@@ -1,16 +1,16 @@
 import { Op } from "sequelize";
 import { NextFunction , Request ,Response} from "express";
-import { Products } from "../interfaces/product/IProduct";
+import { Product } from "../interfaces/product/IProduct";
 import { MulterRequest } from "../interfaces/requests/IMulterRequest";
 import { Filter, Paging, sortItem } from "../interfaces/filtering/IFilter";
 import { LOG_TYPE, logger } from "../middleware/logEvents";
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 const ProductImageUrl = require('../models/productImageUrls');
-const Product = require('../models/products');
+const Products = require('../models/products');
 
 const createProduct = async(req:Request , res: Response) => {
-    const { description, title, price }: Products = req.body;
+    const { description, title, price }: Product = req.body;
     const files  = (req as MulterRequest).files;
     
     const message = 
@@ -19,7 +19,7 @@ const createProduct = async(req:Request , res: Response) => {
     !title? 'Title is Empty' : null;
     if(message) return res.status(400).json({message: message});
 
-    const duplicateByName = await Product.findOne({ where: { title: title } });
+    const duplicateByName = await Products.findOne({ where: { title: title } });
     if(duplicateByName) return res.status(409).json({message: 'This Title already exist'})
     try {
         const id = uuidv4();
@@ -38,7 +38,7 @@ const createProduct = async(req:Request , res: Response) => {
                 })
             })
         }
-        const result = await Product.create({
+        const result = await Products.create({
             id: id,
             title: title,
             description: description,
@@ -47,6 +47,7 @@ const createProduct = async(req:Request , res: Response) => {
         if(result)
             return res.status(201).json({data: `New Product ${result.title} created!`});
     } catch (error) {
+        logger(LOG_TYPE.Error, error.toString(), "Controller",'ProductController/createProduct/line-50');
         console.log(error);
     }                
 }
@@ -56,7 +57,7 @@ const getProducts = async(req:Request , res: Response) => {
     const { itemPerPage, currentPage }: Paging = paging;
     const { sortOn, isAscending }: sortItem = sortItem;
     const direction = isAscending ? "ASC" : "DESC";
-    const {title, price, id}: Products = model;
+    const {title, price, id}: Product = model;
     try {
         let conditions: any = {}
         if (title) {
@@ -74,7 +75,7 @@ const getProducts = async(req:Request , res: Response) => {
                 [Op.eq]: price 
             };
         }
-        const foundItems = await Product.findAll({
+        const foundItems = await Products.findAll({
             where: conditions,
             order: sortOn ? [[sortOn, direction]] : [],
             offset: itemPerPage && currentPage ? (currentPage - 1) * itemPerPage : undefined,
@@ -82,6 +83,7 @@ const getProducts = async(req:Request , res: Response) => {
         })
         res.status(201).json({data: foundItems});
     } catch (error) {
+        logger(LOG_TYPE.Error, error.toString(), "Controller",'ProductController/getProducts/line-86');
         console.log(error);
     }
 }

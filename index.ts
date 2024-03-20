@@ -10,9 +10,9 @@ import sequelize from './utils/database';
 import product from './routes/products';
 import auth from './routes/auth';
 import { verifyJWT } from './middleware/verifyJWT';
-const Product = require('./models/products');
+const Products = require('./models/products');
 const ProductImageUrl = require('./models/productImageUrls');
-const User = require('./models/users');
+const Users = require('./models/users');
 require('dotenv').config();
 
 const app = express();

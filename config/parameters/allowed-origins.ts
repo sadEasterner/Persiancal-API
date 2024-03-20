@@ -1,1 +1,1 @@
-export const ALLOWED_ORIGINS: string[] = ["http://localhost:5173","http://localhost:4003"];
+export const ALLOWED_ORIGINS: string[] = ["http://localhost:3000"];

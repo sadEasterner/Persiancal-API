@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
+import { logger, LOG_TYPE } from './logEvents';
+import { AuthenticatedRequest } from '../interfaces/requests/IAuthenticatedRequest';
 
 
-interface AuthenticatedRequest extends Request {
-    user?: any; 
-    roles?: string[]; 
-}
+
 
 export const verifyJWT = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     let authHeader: string | undefined;
@@ -14,16 +13,22 @@ export const verifyJWT = (req: AuthenticatedRequest, res: Response, next: NextFu
     } else if (req.headers.Authorization && typeof req.headers.Authorization === 'string') {
         authHeader = req.headers.Authorization;
     }
-    if (!authHeader?.startsWith('Bearer')) return res.sendStatus(401);
+    if (!authHeader?.startsWith('Bearer')) {
+        logger(LOG_TYPE.Error,"token does not exist in header", "middleware",'middleware/verifyJWT/line-19');
+        return res.sendStatus(401);
+    }
 
     const token = authHeader.split(' ')[1];
     jwt.verify(
         token,
         process.env.ACCESS_TOKEN_SECRET as string,
         (err, decoded) => {
-            if(err) return res.sendStatus(403); //invalid token
-            req.user = (decoded as any).UserInfo.username;
-            req.roles = (decoded as any).UserInfo.roles;
+            if(err) {
+                logger(LOG_TYPE.Error,"token is not valid", "middleware",'middleware/verifyJWT/line-29');
+                return res.sendStatus(403); //invalid token
+            }
+            req.username = (decoded as any).UserInfo.username;
+            req.role = (decoded as any).UserInfo.roles;
             next();
         }
     )

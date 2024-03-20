@@ -8,7 +8,11 @@ import cookieParser from 'cookie-parser';
 import { reqLogger } from './middleware/logEvents';
 import sequelize from './utils/database';
 import product from './routes/products';
+import auth from './routes/auth';
+import { verifyJWT } from './middleware/verifyJWT';
 const Product = require('./models/products');
+const ProductImageUrl = require('./models/productImageUrls');
+const User = require('./models/users');
 require('dotenv').config();
 
 const app = express();
@@ -20,7 +24,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 
-
+app.use('/auth', auth);
+//app.use(verifyJWT);
 app.use('/product', product);
 
 app.all('*', (req: Request, res: Response) => {
@@ -37,12 +42,10 @@ app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
 
     try {
-        // Test the database connection
         await sequelize.authenticate();
         console.log('Database connection has been established successfully.');
 
-        // Sync the models with the database (this will create tables if they don't exist)
-        await sequelize.sync({ force: true });
+        await sequelize.sync();
         console.log('Models synchronized with the database.');
 
     } catch (error) {

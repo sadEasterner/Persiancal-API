@@ -25,7 +25,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --watch 'src/**/*.ts' --exec node_modules/.bin/ts-node index.ts",
+    "start": "nodemon --exec node_modules/.bin/ts-node --files index.ts",
     "build": "tsc"
   },
   "keywords": [],

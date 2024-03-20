@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import sequelize from '../utils/database';
 
 const Product = sequelize.define('product',{
@@ -13,13 +13,13 @@ const Product = sequelize.define('product',{
         type: DataTypes.DOUBLE,
         allowNull: true
     },
-    imageUrl: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
     description: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    ProductStatus: {
+        type: DataTypes.NUMBER,
+        defaultValue: 0,
     }
 });
 

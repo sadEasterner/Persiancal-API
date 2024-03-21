@@ -47,17 +47,17 @@ const createProduct = async(req:Request , res: Response) => {
         if(result)
             return res.status(201).json({data: `New Product ${result.title} created!`});
     } catch (error) {
-        logger(LOG_TYPE.Error, error.toString(), "Controller",'ProductController/createProduct/line-50');
+        logger(LOG_TYPE.Error, `${error}`, "Controller",'ProductController/createProduct/line-50');
         console.log(error);
     }                
 }
 
 const getProducts = async(req:Request , res: Response) => {
-    const {model,sortItem, paging,isExact }: Filter = req.body;
+    const { model, sortItem, paging, isExact }: Filter = req.body;
     const { itemPerPage, currentPage }: Paging = paging;
     const { sortOn, isAscending }: sortItem = sortItem;
     const direction = isAscending ? "ASC" : "DESC";
-    const {title, price, id}: Product = model;
+    const { title, price, id }: Product = model;
     try {
         let conditions: any = {}
         if (title) {
@@ -81,9 +81,9 @@ const getProducts = async(req:Request , res: Response) => {
             offset: itemPerPage && currentPage ? (currentPage - 1) * itemPerPage : undefined,
             limit: itemPerPage ? itemPerPage : undefined
         })
-        res.status(201).json({data: foundItems});
+        return res.status(201).json({data: foundItems});
     } catch (error) {
-        logger(LOG_TYPE.Error, error.toString(), "Controller",'ProductController/getProducts/line-86');
+        logger(LOG_TYPE.Error, `${error}`, "Controller",'ProductController/getProducts/line-86');
         console.log(error);
     }
 }

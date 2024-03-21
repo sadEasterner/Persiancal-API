@@ -43,14 +43,14 @@ const signup = async(req:Request , res: Response) => {
             name: name,
             refreshToken: refreshToken
         })
-        if(result) return res.status(500).json({message: "server error"});
+        if(!result) return res.status(500).json({message: "server error"});
 
         res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });
         return res.status(201).json({data: accessToken});
 
     } catch (error) {
         console.log(error);
-        logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/signup');
+        // logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/signup');
     }
 }
 const login = async(req:Request , res: Response) => {
@@ -67,7 +67,7 @@ const login = async(req:Request , res: Response) => {
         const accessToken = jwt.sign(
             {"UserInfo": {
                 "username": username,
-                "role": ROLES_LIST.User
+                "role": foundUser.role
             }},
             process.env.ACCESS_TOKEN_SECRET!,
             {expiresIn: '3600s' }
@@ -79,12 +79,12 @@ const login = async(req:Request , res: Response) => {
         );
         foundUser.refreshToken = refreshToken;
         const result = await foundUser.save();
-        
         if(!result) return res.status(500).json({message: "Server error"});
         
+        res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });
         return res.status(200).json({data: accessToken})
     } catch (error) {
-        logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/login');
+        // logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/login');
         console.log(error); 
     }
 }
@@ -107,36 +107,43 @@ const logout = async(req:Request , res: Response) => {
 
 }
 const forgetPassword = async(req:Request , res: Response) => {
-    const { emial, password, username }: User = req.body;
-    if(!username) return res.status(400).json({error: 'Username is required'});
-    if(!password) return res.status(400).json({error: 'Password is required'});
+    const { emial }: User = req.body;
     if(!emial) return res.status(400).json({error: 'Emial is required'});
+
     
 }
+const restPassword = async(req:Request , res: Response) => {
+    const { password }: User = req.body;
+
+}
+
 const handleRefreshToken = async(req:Request , res: Response) => {
     const cookies = req.cookies;
     if (!cookies?.jwt) return res.sendStatus(401);
     const refreshToken = cookies.jwt;
-    const foundUser = await Users.findOne({ where:{ RefreshToken: refreshToken }});
-    if (!foundUser) return res.sendStatus(403); //Forbidden 
-    jwt.verify(
-        refreshToken,
-        process.env.REFRESH_TOKEN_SECRET!,
-        (err: any, decoded: any) => {
-            if (err || foundUser.username !== decoded.username) return res.sendStatus(403);
-            const role = foundUser.role
-            const accessToken = jwt.sign(
-                {
-                    "UserInfo": {
-                        "username": decoded.username,
-                        "role": role
-                    }
-                },
-                process.env.ACCESS_TOKEN_SECRET!,
-                { expiresIn: '1ds' }
-            );
-            res.status(200).json({ accessToken })
-        }
-    );
+    try {
+        const foundUser = await Users.findOne({ where:{ RefreshToken: refreshToken }});
+        if (!foundUser) return res.sendStatus(403); //Forbidden 
+        jwt.verify(
+            refreshToken,
+            process.env.REFRESH_TOKEN_SECRET!,
+            (err: any, decoded: any) => {
+                if (err || foundUser.username !== decoded.username) return res.sendStatus(403);
+                const accessToken = jwt.sign(
+                    {"UserInfo": {
+                        "username": foundUser.username,
+                        "role": foundUser.role
+                    }},
+                    process.env.ACCESS_TOKEN_SECRET!,
+                    {expiresIn: '3600s' }
+                );
+                res.status(200).json({ accessToken })
+            }
+        );
+    } catch (error) {
+        console.log(error);
+    }
+
+    
 }
-export default {signup, login, logout, forgetPassword,handleRefreshToken};
+export default {signup, login, logout, forgetPassword, restPassword, handleRefreshToken};

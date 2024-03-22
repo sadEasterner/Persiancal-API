@@ -11,21 +11,23 @@ import path from 'path';
 import jwt from 'jsonwebtoken';
 import { ROLES_LIST } from "../config/parameters/roles-list";
 import { UserInfo } from "../interfaces/user/IUserInfo";
+import { USER_STATUS } from "../config/parameters/user-status";
+import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedRequest";
 
 
 const createUser = async(req:Request , res: Response) => {
-    const { address, emial, name, password, username }: User = req.body;
-    if(!username) return res.status(400).json({error: 'Username is required'});
-    if(!password) return res.status(400).json({error: 'Password is required'});
-    if(!emial) return res.status(400).json({error: 'Emial is required'});
-    if(!address) return res.status(400).json({error: 'Address is required'});
-    if(!name) return res.status(400).json({error: 'Name is required'});
+    const { address, email, name, password, username }: User = req.body;
+    if(!username) return res.status(400).json({message: 'Username is required'});
+    if(!password) return res.status(400).json({message: 'Password is required'});
+    if(!email) return res.status(400).json({message: 'Email is required'});
+    if(!address) return res.status(400).json({message: 'Address is required'});
+    if(!name) return res.status(400).json({message: 'Name is required'});
     const duplicate = await Users.findOne({ where: { username: username } });
-    if(duplicate)  return res.status(409).json({ error: 'User by this username already exists'});
+    if(duplicate)  return res.status(409).json({ message: 'User by this username already exists'});
     try {
         const result = await Users.create({
             username: username,
-            emial: emial,
+            email: email,
             password: password,
             address: address,
             name: name,
@@ -38,15 +40,16 @@ const createUser = async(req:Request , res: Response) => {
         // logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/signup');
     }
 };
+
 const editUser = async(req:Request , res: Response) => {
-    const { address, emial, name, password, username }: User = req.body;
+    const { address, email, name, password, username }: User = req.body;
  
     const foundUser = await Users.findOne({ where: { username: username } });
-    if(!foundUser) return res.status(401).json({error: "Username does not exist"});
+    if(!foundUser) return res.status(401).json({message: "Username does not exist"});
     try {
         //if(username) foundUser.username = username;
         if(password) foundUser.password = password;
-        if(emial) foundUser.emial = emial;
+        if(email) foundUser.email = email;
         if(address) foundUser.address = address;
         if(name) foundUser.name = name;
         const result = await foundUser.save();
@@ -54,26 +57,50 @@ const editUser = async(req:Request , res: Response) => {
         return res.status(201).json({data: `user name by this username: ${result.username} updated`});
     } catch (error) {
         console.log(error);
-        // logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/signup');
     }
 };
 
-const getUserByUsername = async(req:Request , res: Response) => {
-    const { username }: User = req.body;
-    if(!username) return res.status(400).json({error: 'Username is required'});
+const changeUserStatus = async(req:Request , res: Response) => {
+    const { username, userStatus }: UserInfo = req.body;
+    const validUserStatusTochange = Object.entries(USER_STATUS).map(([key, value]) => value );
+    if(!validUserStatusTochange.includes(userStatus)) return res.status(400).json({message: 'UserStatus is invalid'});
+    const httpMethod = req.method;
+
+    try {
+
+        const foundUser = await Users.findOne({ where: { username: username }});
+
+        if(!foundUser) return res.status(401).json({message: "Username does not exist"});
+        if(userStatus) foundUser.userStatus = userStatus;
+        if(httpMethod === "DELETE") foundUser.userStatus = USER_STATUS.Deleted;
+        
+        const result = await foundUser.save();
+        if(!result) return res.status(500).json({message: "server error"});
+
+        return res.status(201).json({data: `user name by this username: ${result.username} updated`});
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const getUserByUsername = async(req:AuthenticatedRequest , res: Response) => {
+    const { username } = req.params;
+
+    if(!username) return res.status(400).json({message: 'Username is required'});
+    if(!(req.currentRole === ROLES_LIST.Admin || req.currentUsername === username)) return res.status(403).json({message: 'Forbidden requset'});
     try {
         const foundUser = await Users.findOne({where: {username: username}});
         if(!foundUser) return res.status(401).json({message: "Username does not exist"});
         let userInfo: UserInfo = {
             username: foundUser.username,
-            emial: foundUser.emial,
+            email: foundUser.email,
             name: foundUser.name,
             address: foundUser.address,
             userStatus: foundUser.userStatus
         }
         return res.status(200).json({data: userInfo});
     } catch (error) {
-        
+        console.log(error);
     }
 
 };
@@ -83,7 +110,7 @@ const getUsers = async(req:Request , res: Response) => {
     const { itemPerPage, currentPage }: Paging = paging;
     const { sortOn, isAscending }: sortItem = sortItem;
     const direction = isAscending ? "ASC" : "DESC";
-    const { address, emial, name, username }: User = model;
+    const { address, email, name, username }: User = model;
     try {
         const conditions: any = {}
         if(username){
@@ -98,9 +125,9 @@ const getUsers = async(req:Request , res: Response) => {
             }
         };
 
-        if(emial){
-            conditions.emial = {
-                [Op.like]: emial 
+        if(email){
+            conditions.email = {
+                [Op.like]: email 
             }
         };
 
@@ -120,7 +147,7 @@ const getUsers = async(req:Request , res: Response) => {
         const usersList: UserInfo[] = foundItems.map((item: User) => {
             let userToShow:UserInfo = {
                 username: item.username,
-                emial: item.emial,
+                email: item.email,
                 name: item.name,
                 address: item.address,
                 userStatus: item.userStatus
@@ -134,4 +161,4 @@ const getUsers = async(req:Request , res: Response) => {
     }
 };
 
-export default { createUser, getUserByUsername, getUsers };
+export default { createUser, getUserByUsername, getUsers, editUser, changeUserStatus };

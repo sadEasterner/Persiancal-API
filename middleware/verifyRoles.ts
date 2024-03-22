@@ -9,11 +9,11 @@ import { AuthenticatedRequest } from '../interfaces/requests/IAuthenticatedReque
 const verifyRoles = (...alloedRoles: any) => {
     return (req:AuthenticatedRequest, res:Response, next:NextFunction) => {
         const rolesArray = [...alloedRoles];
-        if(!req.role) {
+        if(!req.currentRole ) {
             logger(LOG_TYPE.Error,"user have no roles", "middleware",'middleware/verifyRoles/line-15');
             return res.status(401);
         }
-        const result = rolesArray.includes(req.role);
+        const result = rolesArray.includes(req.currentRole);
         if(!result) {
             logger(LOG_TYPE.Error,"user have no access", "middleware",'middleware/verifyRoles/line-20');
             return res.status(403).json({message: "user have no access"});

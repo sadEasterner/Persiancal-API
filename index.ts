@@ -9,9 +9,10 @@ import { reqLogger } from './middleware/logEvents';
 import sequelize from './utils/database';
 import product from './routes/products';
 import auth from './routes/auth';
+import user from './routes/user';
 import { verifyJWT } from './middleware/verifyJWT';
 const Products = require('./models/products');
-const ProductImageUrl = require('./models/productImageUrls');
+const ProductImageUrls = require('./models/productImageUrls');
 const Users = require('./models/users');
 require('dotenv').config();
 
@@ -25,7 +26,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/auth', auth);
-//app.use(verifyJWT);
+app.use(verifyJWT);
+app.use('/user', user);
 app.use('/product', product);
 
 app.all('*', (req: Request, res: Response) => {

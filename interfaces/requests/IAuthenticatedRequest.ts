@@ -1,6 +1,6 @@
 import { Request } from "express";
 
 export interface AuthenticatedRequest extends Request {
-    username?: string; 
-    role?: number; 
+    currentUsername?: string; 
+    currentRole?: number; 
 }

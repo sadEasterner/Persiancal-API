@@ -13,10 +13,10 @@ import { ROLES_LIST } from "../config/parameters/roles-list";
 
 
 const signup = async(req:Request , res: Response) => {
-    const { address, emial, name, password, username }: User = req.body;
+    const { address, email, name, password, username }: User = req.body;
     if(!username) return res.status(400).json({error: 'Username is required'});
     if(!password) return res.status(400).json({error: 'Password is required'});
-    if(!emial) return res.status(400).json({error: 'Emial is required'});
+    if(!email) return res.status(400).json({error: 'Email is required'});
     if(!address) return res.status(400).json({error: 'Address is required'});
     if(!name) return res.status(400).json({error: 'Name is required'});
     const duplicate = await Users.findOne({ where: { username: username } });
@@ -37,7 +37,7 @@ const signup = async(req:Request , res: Response) => {
         );
         const result = await Users.create({
             username: username,
-            emial: emial,
+            email: email,
             password: password,
             address: address,
             name: name,
@@ -107,8 +107,8 @@ const logout = async(req:Request , res: Response) => {
 
 }
 const forgetPassword = async(req:Request , res: Response) => {
-    const { emial }: User = req.body;
-    if(!emial) return res.status(400).json({error: 'Emial is required'});
+    const { email }: User = req.body;
+    if(!email) return res.status(400).json({error: 'Email is required'});
 
     
 }

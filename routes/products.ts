@@ -7,8 +7,8 @@ const router = Router();
 
 router.route('').get();
 router.route('').post(productController.createProduct);
-router.route('/get').post(productController.getProducts);
-router.route('/').put();
-router.route('/').delete();
+router.route('/getList').post(productController.getProducts);
+router.route('').put();
+router.route('').delete();
 
 export default router;

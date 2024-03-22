@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../utils/database';
 
-const ProductImageUrl = sequelize.define('imageUrl',{
+const ProductImageUrls = sequelize.define('productsImageUrls',{
     id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -17,4 +17,4 @@ const ProductImageUrl = sequelize.define('imageUrl',{
     }
 });
 
-module.exports =  ProductImageUrl;
+module.exports =  ProductImageUrls;

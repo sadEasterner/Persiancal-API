@@ -1,6 +1,6 @@
 export const USER_STATUS = {
-    "Pendding": 0,
-    "Active": 1,
-    "Banned": 2,
-    "Deleted": 3
+    "Pendding": 1,
+    "Active": 2,
+    "Banned": 3,
+    "Deleted": 4
 };

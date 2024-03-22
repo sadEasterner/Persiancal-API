@@ -27,8 +27,8 @@ export const verifyJWT = (req: AuthenticatedRequest, res: Response, next: NextFu
                 logger(LOG_TYPE.Error,"token is not valid", "middleware",'middleware/verifyJWT/line-29');
                 return res.sendStatus(403); //invalid token
             }
-            req.username = (decoded as any).UserInfo.username;
-            req.role = (decoded as any).UserInfo.roles;
+            req.currentUsername = (decoded as any).UserInfo.username;
+            req.currentRole = (decoded as any).UserInfo.role;
             next();
         }
     )

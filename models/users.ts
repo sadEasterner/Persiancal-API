@@ -1,5 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../utils/database';
+import { ROLES_LIST } from '../middleware/verifyRoles';
+import { USER_STATUS } from '../config/parameters/user-status';
 
 const Users = sequelize.define('user',{
     username: {
@@ -11,9 +13,9 @@ const Users = sequelize.define('user',{
         type: DataTypes.STRING,
         allowNull: false,
     },
-    roles: {
+    role: {
         type: DataTypes.INTEGER,
-        defaultValue: 0,
+        defaultValue: ROLES_LIST.User,
         allowNull: false
     },
     password: {
@@ -22,11 +24,11 @@ const Users = sequelize.define('user',{
     },
     userStatus: {
         type: DataTypes.INTEGER,
-        defaultValue: 0,
+        defaultValue: USER_STATUS.Pendding,
         allowNull: false
     },
     refreshToken: DataTypes.STRING,
-    emial: {
+    email: {
         type:DataTypes.STRING,
         allowNull: false
     },

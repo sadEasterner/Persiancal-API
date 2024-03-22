@@ -40,7 +40,6 @@ const createUser = async(req:Request , res: Response) => {
         // logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/signup');
     }
 };
-
 const editUser = async(req:Request , res: Response) => {
     const { address, email, name, password, username }: User = req.body;
  
@@ -59,11 +58,10 @@ const editUser = async(req:Request , res: Response) => {
         console.log(error);
     }
 };
-
 const changeUserStatus = async(req:Request , res: Response) => {
     const { username, userStatus }: UserInfo = req.body;
     const validUserStatusTochange = Object.entries(USER_STATUS).map(([key, value]) => value );
-    if(!validUserStatusTochange.includes(userStatus)) return res.status(400).json({message: 'UserStatus is invalid'});
+    if(!validUserStatusTochange.includes(userStatus) && userStatus) return res.status(400).json({message: 'UserStatus is invalid'});
     const httpMethod = req.method;
 
     try {
@@ -82,7 +80,6 @@ const changeUserStatus = async(req:Request , res: Response) => {
         console.log(error);
     }
 };
-
 const getUserByUsername = async(req:AuthenticatedRequest , res: Response) => {
     const { username } = req.params;
 
@@ -104,7 +101,6 @@ const getUserByUsername = async(req:AuthenticatedRequest , res: Response) => {
     }
 
 };
-
 const getUsers = async(req:Request , res: Response) => {
     const { model, sortItem, paging }: Filter = req.body;
     const { itemPerPage, currentPage }: Paging = paging;

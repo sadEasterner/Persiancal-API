@@ -106,17 +106,6 @@ const logout = async(req:Request , res: Response) => {
     }
 
 }
-const forgetPassword = async(req:Request , res: Response) => {
-    const { email }: User = req.body;
-    if(!email) return res.status(400).json({error: 'Email is required'});
-
-    
-}
-const restPassword = async(req:Request , res: Response) => {
-    const { password }: User = req.body;
-
-}
-
 const handleRefreshToken = async(req:Request , res: Response) => {
     const cookies = req.cookies;
     if (!cookies?.jwt) return res.sendStatus(401);
@@ -145,5 +134,15 @@ const handleRefreshToken = async(req:Request , res: Response) => {
     }
 
     
+}
+const forgetPassword = async(req:Request , res: Response) => {
+    const { email }: User = req.body;
+    if(!email) return res.status(400).json({error: 'Email is required'});
+
+    
+}
+const restPassword = async(req:Request , res: Response) => {
+    const { password }: User = req.body;
+
 }
 export default {signup, login, logout, forgetPassword, restPassword, handleRefreshToken};

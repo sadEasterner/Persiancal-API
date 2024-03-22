@@ -1,10 +1,10 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../utils/database';
+import { PRODUCT_STATUS } from '../config/parameters/products-status';
 
 const Products = sequelize.define('product',{
     id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true
     },
@@ -17,9 +17,9 @@ const Products = sequelize.define('product',{
         type: DataTypes.STRING,
         allowNull: false
     },
-    ProductStatus: {
-        type: DataTypes.NUMBER,
-        defaultValue: 0,
+    productStatus: {
+        type: DataTypes.INTEGER,
+        defaultValue: PRODUCT_STATUS.Pendding,
     }
 });
 

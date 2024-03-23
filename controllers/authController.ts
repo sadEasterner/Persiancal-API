@@ -50,7 +50,7 @@ const signup = async(req:Request , res: Response) => {
 
     } catch (error) {
         console.log(error);
-        // logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/signup');
+        logger(LOG_TYPE.Error, `${error}`, "Controller",'AuthController/signup');
     }
 }
 const login = async(req:Request , res: Response) => {
@@ -84,7 +84,7 @@ const login = async(req:Request , res: Response) => {
         res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });
         return res.status(200).json({data: accessToken})
     } catch (error) {
-        // logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/login');
+        logger(LOG_TYPE.Error, `${error}`, "Controller",'AuthController/login');
         console.log(error); 
     }
 }
@@ -102,7 +102,8 @@ const logout = async(req:Request , res: Response) => {
         return res.status(204).json({data: "User logged out!"})
 
     } catch (error) {
-        
+        logger(LOG_TYPE.Error, `${error}`, "Controller",'AuthController/logout');
+        console.log(error); 
     }
 
 }
@@ -130,7 +131,8 @@ const handleRefreshToken = async(req:Request , res: Response) => {
             }
         );
     } catch (error) {
-        console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "Controller",'AuthController/handleRefreshToken');
+        console.log(error); 
     }
 
     

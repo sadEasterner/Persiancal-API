@@ -37,7 +37,7 @@ const createUser = async(req:Request , res: Response) => {
         return res.status(201).json({data: `user name by this username: ${result.username} created`});
     } catch (error) {
         console.log(error);
-        // logger(LOG_TYPE.Error, error.toString(), "Controller",'AuthController/signup');
+        logger(LOG_TYPE.Error, `${error}`, "error",'userController/createUser');
     }
 };
 const editUser = async(req:Request , res: Response) => {
@@ -56,6 +56,7 @@ const editUser = async(req:Request , res: Response) => {
         return res.status(201).json({data: `user name by this username: ${result.username} updated`});
     } catch (error) {
         console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "error",'userController/editUser');
     }
 };
 const changeUserStatus = async(req:Request , res: Response) => {
@@ -78,6 +79,7 @@ const changeUserStatus = async(req:Request , res: Response) => {
         return res.status(201).json({data: `user name by this username: ${result.username} updated`});
     } catch (error) {
         console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "error",'userController/changeUserStatus');
     }
 };
 const getUserByUsername = async(req:AuthenticatedRequest , res: Response) => {
@@ -97,7 +99,8 @@ const getUserByUsername = async(req:AuthenticatedRequest , res: Response) => {
         }
         return res.status(200).json({data: userInfo});
     } catch (error) {
-        console.log(error);
+        console.log(error);        
+        logger(LOG_TYPE.Error, `${error}`, "error",'userController/getUserByUsername');
     }
 
 };
@@ -154,6 +157,7 @@ const getUsers = async(req:Request , res: Response) => {
         return res.status(201).json({data: usersList});
     } catch (error) {
         console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "error",'userController/getUsers');
     }
 };
 

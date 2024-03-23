@@ -26,9 +26,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/auth', auth);
+app.use('/product', product);
 app.use(verifyJWT);
 app.use('/user', user);
-app.use('/product', product);
 
 app.all('*', (req: Request, res: Response) => {
     res.status(404);

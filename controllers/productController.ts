@@ -49,7 +49,7 @@ const createProduct = async(req:Request , res: Response) => {
         if(result)
             return res.status(201).json({data: `New Product ${result.title} created!`});
     } catch (error) {
-        logger(LOG_TYPE.Error, `${error}`, "Controller",'ProductController/createProduct/line-50');
+        logger(LOG_TYPE.Error, `${error}`, "errors",'ProductController/createProduct');
         console.log(error);
     }                
 }
@@ -88,7 +88,7 @@ const getProducts = async(req:Request , res: Response) => {
         return res.status(201).json({data: foundItems});
         
     } catch (error) {
-        logger(LOG_TYPE.Error, `${error}`, "Controller",'ProductController/getProducts/line-86');
+        logger(LOG_TYPE.Error, `${error}`, "errors",'ProductController/getProducts');
         console.log(error);
     }
 }
@@ -107,6 +107,7 @@ const getProductById = async(req:Request , res: Response) => {
         return res.status(200).json({data: ProductInfo})
     } catch (error) {
         console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "errors",'ProductController/getProductById');
     } 
 }
 const changeProductStatus = async(req:Request , res: Response) => {
@@ -124,6 +125,7 @@ const changeProductStatus = async(req:Request , res: Response) => {
         return res.status(200).json({data: `user by this id : ${result.id} deleted`});
     } catch (error) {
         console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "errors",'ProductController/changeProductStatus');
     }
 }
 const editProduct = async(req:Request , res: Response) => {
@@ -141,6 +143,7 @@ const editProduct = async(req:Request , res: Response) => {
         return res.status(200).json({data: `user by this id : ${result.id} updated`});
     } catch (error) {
         console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "errors",'ProductController/editProduct');
     }
 
 }

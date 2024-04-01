@@ -88,16 +88,13 @@ const getUserByUsername = async(req:AuthenticatedRequest , res: Response) => {
     if(!username) return res.status(400).json({message: 'Username is required'});
     if(!(req.currentRole === ROLES_LIST.Admin || req.currentUsername === username)) return res.status(403).json({message: 'Forbidden requset'});
     try {
-        const foundUser = await Users.findOne({where: {username: username}});
+        const foundUser = await Users.findOne({
+            where: {username: username},
+            attributes: { exclude: ['password', 'refreshToken', 'role'] },
+        });
         if(!foundUser) return res.status(401).json({message: "Username does not exist"});
-        let userInfo: UserInfo = {
-            username: foundUser.username,
-            email: foundUser.email,
-            name: foundUser.name,
-            address: foundUser.address,
-            userStatus: foundUser.userStatus
-        }
-        return res.status(200).json({data: userInfo});
+
+        return res.status(200).json({data: foundUser});
     } catch (error) {
         console.log(error);        
         logger(LOG_TYPE.Error, `${error}`, "error",'userController/getUserByUsername');
@@ -138,23 +135,13 @@ const getUsers = async(req:Request , res: Response) => {
 
         const foundItems = await Users.findAll({
             where: conditions,
+            attributes: { exclude: ['password', 'refreshToken', 'role'] }, 
             order: sortOn ? [[sortOn, direction]] : [],
             offset: itemPerPage && currentPage ? (currentPage - 1) * itemPerPage : undefined,
             limit: itemPerPage ? itemPerPage : undefined
         });
 
-        const usersList: UserInfo[] = foundItems.map((item: User) => {
-            let userToShow:UserInfo = {
-                username: item.username,
-                email: item.email,
-                name: item.name,
-                address: item.address,
-                userStatus: item.userStatus
-            };
-            return userToShow;
-        })
-
-        return res.status(201).json({data: usersList});
+        return res.status(201).json({data: foundItems});
     } catch (error) {
         console.log(error);
         logger(LOG_TYPE.Error, `${error}`, "error",'userController/getUsers');

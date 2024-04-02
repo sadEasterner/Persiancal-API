@@ -1,6 +1,6 @@
 import path from "path";
 import { NextFunction , Request ,Response} from "express";
-import { MulterRequest } from "../interfaces/IMulterRequest";
+import { MulterRequest } from "../interfaces/requests/IMulterRequest";
 
 const fileExtLimiter = (allowedExtArray: string | string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {

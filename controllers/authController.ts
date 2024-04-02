@@ -10,6 +10,10 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 import { ROLES_LIST } from "../config/parameters/roles-list";
+import nodemailer from 'nodemailer';
+import { transporter } from "../utils/emailTransporter";
+import { generateRecoveryCode } from "../utils/recoveryCodeGenerator";
+
 
 
 const signup = async(req:Request , res: Response) => {
@@ -141,7 +145,26 @@ const forgetPassword = async(req:Request , res: Response) => {
     const { email }: User = req.body;
     if(!email) return res.status(400).json({error: 'Email is required'});
 
-    
+    try {
+        const foundUser = await Users.findOne({ where: { username: email } });
+        if(!foundUser) return res.status(400).json({error: 'No user found by this email'});
+        const recoveryCode = generateRecoveryCode(4);
+        await transporter.sendMail({
+            from: 'your_email@example.com', // Your email address
+            to: email,
+            subject: 'Account Recovery Code',
+            text: `Your account recovery code is: ${recoveryCode}`
+        });
+        const result = await foundUser.save();
+        if(!result) return res.status(400).json({message: "faild to save recovery Code"})
+        return res.status(200).json({data: "Recovery code sent successfully. "})
+    } catch (error) {
+        console.log(error);
+    }
+
+}
+const validateRecoveryCode = async(req:Request , res: Response) => {
+    const { email, recoveryCode } = req.body;
 }
 const restPassword = async(req:Request , res: Response) => {
     const { password }: User = req.body;

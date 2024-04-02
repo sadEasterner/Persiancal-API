@@ -28,6 +28,7 @@ const Users = sequelize.define('user',{
         allowNull: false
     },
     refreshToken: DataTypes.STRING,
+    recoveryCode: DataTypes.STRING,
     email: {
         type:DataTypes.STRING,
         allowNull: false

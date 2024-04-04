@@ -102,7 +102,12 @@ const getUserByUsername = async(req:AuthenticatedRequest , res: Response) => {
 
 };
 const getUsers = async(req:Request , res: Response) => {
-    const { model, sortItem, paging }: Filter = req.body;
+    const { 
+        model = { address: "", email: "", name: "", username: "" }, 
+        sortItem = { sortOn: "username", isAscending: true }, 
+        paging = {itemPerPage: null, currentPage: null} 
+    }: Filter = req.body;
+
     const { itemPerPage, currentPage }: Paging = paging;
     const { sortOn, isAscending }: sortItem = sortItem;
     const direction = isAscending ? "ASC" : "DESC";
@@ -111,28 +116,24 @@ const getUsers = async(req:Request , res: Response) => {
         const conditions: any = {}
         if(username){
             conditions.username = {
-                [Op.like]: username 
+                [Op.like]: `%${username}%`
             }
         };
-
         if(name){
             conditions.name = {
-                [Op.like]: name 
+                [Op.like]: `%${name}%` 
             }
         };
-
         if(email){
             conditions.email = {
-                [Op.like]: email 
+                [Op.like]: `%${email}%` 
             }
         };
-
         if(address){
             conditions.address = {
-                [Op.like]: address 
+                [Op.like]: `%${address}%` 
             }
         };
-
         const foundItems = await Users.findAll({
             where: conditions,
             attributes: { exclude: ['password', 'refreshToken', 'role'] }, 
@@ -140,8 +141,8 @@ const getUsers = async(req:Request , res: Response) => {
             offset: itemPerPage && currentPage ? (currentPage - 1) * itemPerPage : undefined,
             limit: itemPerPage ? itemPerPage : undefined
         });
-
         return res.status(201).json({data: foundItems});
+
     } catch (error) {
         console.log(error);
         logger(LOG_TYPE.Error, `${error}`, "error",'userController/getUsers');

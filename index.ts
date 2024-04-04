@@ -27,7 +27,7 @@ app.use(cookieParser());
 
 app.use('/auth', auth);
 app.use('/product', product);
-app.use(verifyJWT);
+//app.use(verifyJWT);
 app.use('/user', user);
 
 app.all('*', (req: Request, res: Response) => {

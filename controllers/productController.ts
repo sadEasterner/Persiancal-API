@@ -54,7 +54,12 @@ const createProduct = async(req:Request , res: Response) => {
     }                
 }
 const getProducts = async(req:Request , res: Response) => {
-    const { model, sortItem, paging, isExact }: Filter = req.body;
+    const { 
+        model = { title: "", price: "", id: "" }, 
+        sortItem = { sortOn: "title", isAscending: true }, 
+        paging = { itemPerPage: null, currentPage: null}, 
+        isExact = false 
+    }: Filter = req.body;
     const { itemPerPage, currentPage }: Paging = paging;
     const { sortOn, isAscending }: sortItem = sortItem;
     const direction = isAscending ? "ASC" : "DESC";
@@ -63,7 +68,7 @@ const getProducts = async(req:Request , res: Response) => {
         let conditions: any = {}
         if (title) {
             conditions.title = {
-                [Op.like]: title 
+                [Op.like]: `%${title}%` 
             };
         }
         if (id) {
@@ -73,12 +78,12 @@ const getProducts = async(req:Request , res: Response) => {
         }
         if (price) {
             conditions.price = {
-                [Op.eq]: price 
+                [Op.eq]: Number(price) 
             };
         }
         const foundItems = await Products.findAll({
             where: conditions,
-            order: sortOn ? [[sortOn, direction]] : [],
+            order: [[sortOn, direction]],
             offset: itemPerPage && currentPage ? (currentPage - 1) * itemPerPage : undefined,
             limit: itemPerPage ? itemPerPage : undefined
         })

@@ -31,6 +31,7 @@ const createUser = async(req:Request , res: Response) => {
             password: password,
             address: address,
             name: name,
+            userStatus: USER_STATUS.Active,
             refreshToken: ""
         })
         if(!result) return res.status(500).json({message: "server error"});
@@ -145,7 +146,7 @@ const getUsers = async(req:Request , res: Response) => {
         };
         const foundItems = await Users.findAll({
             where: conditions,
-            attributes: { exclude: ['password', 'refreshToken', 'role'] }, 
+            attributes: { exclude: ['password', 'refreshToken'] }, 
             order: sortOn ? [[sortOn, direction]] : [],
             offset: itemPerPage && currentPage ? (Number(currentPage) - 1) * Number(itemPerPage) : undefined,
             limit: itemPerPage ? Number(itemPerPage) : undefined

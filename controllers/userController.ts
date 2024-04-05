@@ -4,7 +4,6 @@ import { Op, where } from "sequelize";
 import { NextFunction , Request ,Response} from "express";
 import { MulterRequest } from "../interfaces/requests/IMulterRequest";
 import { User } from "../interfaces/user/IUser";
-import { Filter, Paging, sortItem } from "../interfaces/filtering/IFilter";
 import { LOG_TYPE, logger } from "../middleware/logEvents";
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
@@ -13,6 +12,7 @@ import { ROLES_LIST } from "../config/parameters/roles-list";
 import { UserInfo } from "../interfaces/user/IUserInfo";
 import { USER_STATUS } from "../config/parameters/user-status";
 import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedRequest";
+import { UserFilter } from "../interfaces/user/IUserFilter";
 
 
 const createUser = async(req:Request , res: Response) => {
@@ -61,17 +61,18 @@ const editUser = async(req:Request , res: Response) => {
 };
 const changeUserStatus = async(req:Request , res: Response) => {
     const { username, userStatus }: UserInfo = req.body;
+
+    if(!username) return res.status(400).json({message: "username is Empty"});
+    if(!userStatus) return res.status(400).json({message: "userStatus is Empty"});
+
     const validUserStatusTochange = Object.entries(USER_STATUS).map(([key, value]) => value );
     if(!validUserStatusTochange.includes(userStatus) && userStatus) return res.status(400).json({message: 'UserStatus is invalid'});
-    const httpMethod = req.method;
-
     try {
 
         const foundUser = await Users.findOne({ where: { username: username }});
 
         if(!foundUser) return res.status(401).json({message: "Username does not exist"});
         if(userStatus) foundUser.userStatus = userStatus;
-        if(httpMethod === "DELETE") foundUser.userStatus = USER_STATUS.Deleted;
         
         const result = await foundUser.save();
         if(!result) return res.status(500).json({message: "server error"});
@@ -103,15 +104,17 @@ const getUserByUsername = async(req:AuthenticatedRequest , res: Response) => {
 };
 const getUsers = async(req:Request , res: Response) => {
     const { 
-        model = { address: "", email: "", name: "", username: "" }, 
-        sortItem = { sortOn: "username", isAscending: true }, 
-        paging = {itemPerPage: null, currentPage: null} 
-    }: Filter = req.body;
-
-    const { itemPerPage, currentPage }: Paging = paging;
-    const { sortOn, isAscending }: sortItem = sortItem;
+        username, 
+        address, 
+        name, 
+        email, 
+        isAscending = true, 
+        sortOn ="username", 
+        itemPerPage = 0, 
+        currentPage = 0
+    } = req.query as unknown as  UserFilter;
+    
     const direction = isAscending ? "ASC" : "DESC";
-    const { address, email, name, username }: User = model;
     try {
         const conditions: any = {}
         if(username){
@@ -148,5 +151,24 @@ const getUsers = async(req:Request , res: Response) => {
         logger(LOG_TYPE.Error, `${error}`, "error",'userController/getUsers');
     }
 };
+const deleteUser = async(req:Request , res: Response) => {
+    const { username }: any = req.params;
+    if(!username) return res.status(400).json({message: "username is Empty"});
 
-export default { createUser, getUserByUsername, getUsers, editUser, changeUserStatus };
+    try {
+        const foundUser = await Users.findOne({ where: { username: username }});
+
+        if(!foundUser) return res.status(401).json({message: "Username does not exist"});
+        foundUser.userStatus = USER_STATUS.Deleted;
+        
+        const result = await foundUser.save();
+        if(!result) return res.status(500).json({message: "server error"});
+
+        return res.status(201).json({data: `user name by this username: ${result.username} deleted`});
+    } catch (error) {
+        console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "error",'userController/changeUserStatus');
+    }
+};
+
+export default { createUser, getUserByUsername, getUsers, editUser, changeUserStatus, deleteUser };

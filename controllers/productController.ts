@@ -2,12 +2,12 @@ import { Op } from "sequelize";
 import { NextFunction , Request ,Response} from "express";
 import { Product } from "../interfaces/product/IProduct";
 import { MulterRequest } from "../interfaces/requests/IMulterRequest";
-import { Filter, Paging, sortItem } from "../interfaces/filtering/IFilter";
 import { LOG_TYPE, logger } from "../middleware/logEvents";
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import { ProductInfo } from "../interfaces/product/IProductInfo";
 import { PRODUCT_STATUS } from "../config/parameters/products-status";
+import { ProductFilter } from "../interfaces/product/IProductFilter";
 const ProductImageUrl = require('../models/productImageUrls');
 const Products = require('../models/products');
 
@@ -17,7 +17,7 @@ const createProduct = async(req:Request , res: Response) => {
     
     const message = 
     !price ? 'Price is Empty' :
-    !description ? 'Description is Emnpty' :
+    !description ? 'Description is Empty' :
     !title? 'Title is Empty' : null;
     if(message) return res.status(400).json({message: message});
 
@@ -55,15 +55,17 @@ const createProduct = async(req:Request , res: Response) => {
 }
 const getProducts = async(req:Request , res: Response) => {
     const { 
-        model = { title: "", price: "", id: "" }, 
-        sortItem = { sortOn: "title", isAscending: true }, 
-        paging = { itemPerPage: null, currentPage: null}, 
-        isExact = false 
-    }: Filter = req.body;
-    const { itemPerPage, currentPage }: Paging = paging;
-    const { sortOn, isAscending }: sortItem = sortItem;
+        title, 
+        id, 
+        price,
+        isAscending = true, 
+        sortOn ="title", 
+        itemPerPage = 0, 
+        currentPage = 0 
+    }: ProductFilter = req.query as unknown as  ProductFilter;
+    
     const direction = isAscending ? "ASC" : "DESC";
-    const { title, price, id }: Product = model;
+
     try {
         let conditions: any = {}
         if (title) {
@@ -99,7 +101,7 @@ const getProducts = async(req:Request , res: Response) => {
 }
 const getProductById = async(req:Request , res: Response) => {
     const { id } = req.params;
-    if(!id) return res.status(400).json({message: "id is Emnpty"});
+    if(!id) return res.status(400).json({message: "id is Empty"});
     try {
         const foundProcuts = await Products.findOne({ where: { id: id } });
         if(!foundProcuts) return res.status(404).json({message: "no item found"});
@@ -117,13 +119,33 @@ const getProductById = async(req:Request , res: Response) => {
 }
 const changeProductStatus = async(req:Request , res: Response) => {
     const { id, productStatus } = req.body;
-    if(!id) return res.status(400).json({message: "id is Emnpty"});
-    const httpMethod = req.method;
+    if(!id) return res.status(400).json({message: "id is Empty"});
+    if(!productStatus) return res.status(400).json({message: "productStatus is Empty"});
+    
+    const validProductStatusTochange = Object.entries(PRODUCT_STATUS).map(([key, value]) => value );
+    if(!validProductStatusTochange.includes(productStatus) && productStatus) return res.status(400).json({message: 'UserStatus is invalid'});
+    
     try {
         const foundProcuts = await Products.findOne({ where: { id: id } });
         if(!foundProcuts) return res.status(404).json({message: "no item found"});
-        if(productStatus) foundProcuts.productStatus = productStatus;
-        if(httpMethod === "DELETE") foundProcuts.productStatus = PRODUCT_STATUS.Deleted;
+
+        foundProcuts.productStatus = productStatus;
+        const result = await foundProcuts.save();
+        if(!result) return res.status(500).json({message: "server error"});
+        return res.status(200).json({data: `user by this id : ${result.id} updated!`});
+    } catch (error) {
+        console.log(error);
+        logger(LOG_TYPE.Error, `${error}`, "errors",'ProductController/changeProductStatus');
+    }
+}
+const deleteProduct = async(req:Request , res: Response) => {
+    const { id } = req.params;
+    if(!id) return res.status(400).json({message: "id is Emnpty"});
+
+    try {
+        const foundProcuts = await Products.findOne({ where: { id: id } });
+        if(!foundProcuts) return res.status(201).json({message: "no item found"});
+        foundProcuts.productStatus = PRODUCT_STATUS.Deleted;
 
         const result = await foundProcuts.save();
         if(!result) return res.status(500).json({message: "server error"});
@@ -135,7 +157,7 @@ const changeProductStatus = async(req:Request , res: Response) => {
 }
 const editProduct = async(req:Request , res: Response) => {
     const { description, title, price, id }: Product = req.body;
-    if(!id) return res.status(400).json({message: "id is Emnpty"});
+    if(!id) return res.status(400).json({message: "id is Empty"});
     try {
         const foundProcuts = await Products.findOne({ where: { id: id } });
         if(!foundProcuts) return res.status(404).json({message: "no item found"});
@@ -152,4 +174,5 @@ const editProduct = async(req:Request , res: Response) => {
     }
 
 }
-export default {createProduct, getProducts, getProductById, editProduct, changeProductStatus }
+
+export default {createProduct, getProducts, getProductById, editProduct, changeProductStatus, deleteProduct }

@@ -4,7 +4,7 @@ import { Op, where } from "sequelize";
 import { NextFunction , Request ,Response} from "express";
 import { MulterRequest } from "../interfaces/requests/IMulterRequest";
 import { User } from "../interfaces/user/IUser";
-import { Filter, Paging, sortItem } from "../interfaces/filtering/IFilter";
+import { Filter } from "../interfaces/filtering/IFilter";
 import { LOG_TYPE, logger } from "../middleware/logEvents";
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';

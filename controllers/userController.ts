@@ -108,6 +108,7 @@ const getUsers = async(req:Request , res: Response) => {
         address, 
         name, 
         email, 
+        userStatus,
         isAscending = true, 
         sortOn ="username", 
         itemPerPage = 0, 
@@ -120,6 +121,11 @@ const getUsers = async(req:Request , res: Response) => {
         if(username){
             conditions.username = {
                 [Op.like]: `%${username}%`
+            }
+        };
+        if(userStatus){
+            conditions.userStatus = {
+                [Op.eq]: Number(userStatus)
             }
         };
         if(name){

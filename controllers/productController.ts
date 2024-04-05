@@ -58,6 +58,7 @@ const getProducts = async(req:Request , res: Response) => {
         title, 
         id, 
         price,
+        productStatus,
         isAscending = true, 
         sortOn ="title", 
         itemPerPage = 0, 
@@ -81,6 +82,11 @@ const getProducts = async(req:Request , res: Response) => {
         if (price) {
             conditions.price = {
                 [Op.eq]: Number(price) 
+            };
+        }
+        if (productStatus) {
+            conditions.productStatus = {
+                [Op.eq]: Number(productStatus) 
             };
         }
         const foundItems = await Products.findAll({

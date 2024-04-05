@@ -5,4 +5,5 @@ export interface ProductFilter extends Filter{
     title: string;
     price: number;
     description: string;
+    productStatus: number;
 }

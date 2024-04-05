@@ -1,6 +1,6 @@
 export const PRODUCT_STATUS = {
-    "Pendding": 0,
-    "Enable": 1,
-    "Disable": 2,
-    "Deleted": 3
+    "Pendding": 1,
+    "Enable": 2,
+    "Disable": 3,
+    "Deleted": 4
 };

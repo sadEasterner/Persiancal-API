@@ -141,10 +141,10 @@ const getUsers = async(req:Request , res: Response) => {
             where: conditions,
             attributes: { exclude: ['password', 'refreshToken', 'role'] }, 
             order: sortOn ? [[sortOn, direction]] : [],
-            offset: itemPerPage && currentPage ? (currentPage - 1) * itemPerPage : undefined,
-            limit: itemPerPage ? itemPerPage : undefined
+            offset: itemPerPage && currentPage ? (Number(currentPage) - 1) * Number(itemPerPage) : undefined,
+            limit: itemPerPage ? Number(itemPerPage) : undefined
         });
-        return res.status(201).json({data: foundItems});
+        return res.status(200).json({data: foundItems});
 
     } catch (error) {
         console.log(error);

@@ -86,13 +86,13 @@ const getProducts = async(req:Request , res: Response) => {
         const foundItems = await Products.findAll({
             where: conditions,
             order: [[sortOn, direction]],
-            offset: itemPerPage && currentPage ? (currentPage - 1) * itemPerPage : undefined,
-            limit: itemPerPage ? itemPerPage : undefined
+            offset: itemPerPage && currentPage ? (Number(currentPage) - 1) * Number(itemPerPage) : undefined,
+            limit: itemPerPage ? Number(itemPerPage) : undefined
         })
         if(!foundItems.lenght)
             return res.status(404).json({message: "no item found"});
         
-        return res.status(201).json({data: foundItems});
+        return res.status(200).json({data: foundItems});
         
     } catch (error) {
         logger(LOG_TYPE.Error, `${error}`, "errors",'ProductController/getProducts');

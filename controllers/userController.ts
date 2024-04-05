@@ -111,7 +111,7 @@ const getUsers = async(req:Request , res: Response) => {
         email, 
         userStatus,
         isAscending = true, 
-        sortOn ="username", 
+        sortOn = "username", 
         itemPerPage = 0, 
         currentPage = 0
     } = req.query as unknown as  UserFilter;
@@ -144,14 +144,14 @@ const getUsers = async(req:Request , res: Response) => {
                 [Op.like]: `%${address}%` 
             }
         };
-        const foundItems = await Users.findAll({
+        const { count, rows } = await Users.findAndCountAll({
             where: conditions,
             attributes: { exclude: ['password', 'refreshToken'] }, 
             order: sortOn ? [[sortOn, direction]] : [],
             offset: itemPerPage && currentPage ? (Number(currentPage) - 1) * Number(itemPerPage) : undefined,
             limit: itemPerPage ? Number(itemPerPage) : undefined
         });
-        return res.status(200).json({data: foundItems});
+        return res.status(200).json({data: rows, count: count});
 
     } catch (error) {
         console.log(error);

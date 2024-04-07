@@ -8,12 +8,14 @@ import cookieParser from 'cookie-parser';
 import { reqLogger } from './middleware/logEvents';
 import sequelize from './utils/database';
 import product from './routes/products';
+import lab from './routes/lab';
 import auth from './routes/auth';
 import user from './routes/user';
 import { verifyJWT } from './middleware/verifyJWT';
 const Products = require('./models/products');
 const ProductImageUrls = require('./models/productImageUrls');
 const Users = require('./models/users');
+const Labs = require('./models/labs');
 require('dotenv').config();
 
 const app = express();
@@ -27,6 +29,7 @@ app.use(cookieParser());
 
 app.use('/auth', auth);
 app.use('/product', product);
+app.use('/lab', lab);
 app.use(verifyJWT);
 app.use('/user', user);
 

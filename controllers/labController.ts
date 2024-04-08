@@ -1,5 +1,5 @@
 // require('dotenv').config();
-const Labs = require('../models/users');
+const Labs = require('../models/labs');
 import { Op, where } from "sequelize";
 import { NextFunction , Request ,Response} from "express";
 import { MulterRequest } from "../interfaces/requests/IMulterRequest";
@@ -71,7 +71,7 @@ const getLabById = async(req:AuthenticatedRequest , res: Response) => {
         return res.status(200).json({data: foundLab});
     } catch (error) {
         console.log(error);        
-        logger(LOG_TYPE.Error, `${error}`, "error",'userController/getUserByUsername');
+        logger(LOG_TYPE.Error, `${error}`, "error",'labController/getLabById');
     }
 
 };

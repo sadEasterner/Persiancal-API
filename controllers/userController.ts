@@ -42,7 +42,7 @@ const createUser = async(req:Request , res: Response) => {
     }
 };
 const editUser = async(req:Request , res: Response) => {
-    const { address, email, name, password, username }: User = req.body;
+    const { address, email, name, password, username,userStatus }: User = req.body;
  
     const foundUser = await Users.findOne({ where: { username: username } });
     if(!foundUser) return res.status(401).json({message: "Username does not exist"});
@@ -52,6 +52,11 @@ const editUser = async(req:Request , res: Response) => {
         if(email) foundUser.email = email;
         if(address) foundUser.address = address;
         if(name) foundUser.name = name;
+        if(userStatus){
+            const validUserStatusTochange = Object.entries(USER_STATUS).map(([key, value]) => value );
+            if(!validUserStatusTochange.includes(userStatus) && userStatus) return res.status(400).json({message: 'UserStatus is invalid'});
+            foundUser.userStatus = userStatus;
+        } 
         const result = await foundUser.save();
         if(!result) return res.status(500).json({message: "server error"});
         return res.status(201).json({data: `user name by this username: ${result.username} updated`});

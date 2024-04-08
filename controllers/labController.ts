@@ -35,14 +35,18 @@ const createLab = async(req:Request , res: Response) => {
     }
 };
 const editLab = async(req:Request , res: Response) => {
-    const {id, name, description }: Lab = req.body;
+    const {id, name, description,labStatus }: Lab = req.body;
  
     const foundLab = await Labs.findOne({ where: { id: id } });
     if(!foundLab) return res.status(401).json({message: "id does not exist"});
     try {
-        //if(username) foundUser.username = username;
         if(name) foundLab.name = name;
         if(description) foundLab.description = description;
+        if(labStatus){
+            const validLabStatusTochange = Object.entries(LAB_STATUS).map(([key, value]) => value );
+            if(!validLabStatusTochange.includes(labStatus) && labStatus) return res.status(400).json({message: 'LabStatus is invalid'});
+            foundLab.labStatus = labStatus;
+        } 
         const result = await foundLab.save();
         if(!result) return res.status(500).json({message: "server error"});
         return res.status(201).json({data: `lab by this id: ${result.id} updated`});

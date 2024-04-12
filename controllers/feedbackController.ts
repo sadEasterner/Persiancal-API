@@ -64,22 +64,22 @@ const getFeedbacks = async (req: Request, res: Response) => {
     }
     if (companyName) {
       conditions.companyName = {
-        [Op.eq]: Number(companyName),
+        [Op.like]: `%${companyName}%`,
       };
     }
     if (email) {
       conditions.email = {
-        [Op.eq]: Number(email),
+        [Op.like]: `%${email}%`,
       };
     }
     if (phoneNumber) {
       conditions.phoneNumber = {
-        [Op.eq]: Number(phoneNumber),
+        [Op.like]: `%${phoneNumber}%`,
       };
     }
     if (text) {
       conditions.text = {
-        [Op.eq]: Number(text),
+        [Op.like]: `%${text}%`,
       };
     }
     const { count, rows } = await Feedbacks.findAndCountAll({

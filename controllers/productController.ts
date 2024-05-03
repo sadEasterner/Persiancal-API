@@ -95,7 +95,7 @@ const getProducts = async(req:Request , res: Response) => {
             offset: itemPerPage && currentPage ? (Number(currentPage) - 1) * Number(itemPerPage) : undefined,
             limit: itemPerPage ? Number(itemPerPage) : undefined
         })
-        if(!rows.lenght)
+        if(!rows.length)
             return res.status(404).json({message: "no item found"});
         
         return res.status(200).json({data: rows, count: count});

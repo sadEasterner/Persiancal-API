@@ -3,7 +3,7 @@ import sequelize from '../utils/database';
 
 const ProductImageUrls = sequelize.define('productsImageUrls',{
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true
     },

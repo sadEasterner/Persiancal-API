@@ -49,6 +49,7 @@ app.all('*', (req: Request, res: Response) => {
         res.type('txt').send("404 Not Found");
     }
 });
+
 app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
 

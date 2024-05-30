@@ -17,4 +17,5 @@ const ProductImageUrls = sequelize.define('productsImageUrls',{
     }
 });
 
+
 module.exports =  ProductImageUrls;

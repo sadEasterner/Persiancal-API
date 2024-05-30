@@ -20,6 +20,8 @@ const Users = require('./models/users');
 const Labs = require('./models/labs');
 const Feedbacks = require('./models/feedbacks');
 const Courses = require('./models/courses');
+const Associations = require('./utils/associations');
+
 require('dotenv').config();
 
 const app = express();
@@ -30,6 +32,7 @@ app.use(cors(corsOption));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/auth', auth);
 app.use('/product', product);

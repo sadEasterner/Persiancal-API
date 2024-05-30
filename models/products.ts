@@ -2,6 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../utils/database';
 import { PRODUCT_STATUS } from '../config/parameters/products-status';
 
+
 const Products = sequelize.define('product',{
     id: {
         type: DataTypes.STRING,
@@ -22,5 +23,6 @@ const Products = sequelize.define('product',{
         defaultValue: PRODUCT_STATUS.Pendding,
     }
 });
+
 
 module.exports =  Products;

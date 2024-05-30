@@ -10,6 +10,7 @@ import { PRODUCT_STATUS } from "../config/parameters/products-status";
 import { ProductFilter } from "../interfaces/product/IProductFilter";
 const ProductImageUrl = require('../models/productImageUrls');
 const Products = require('../models/products');
+const ProductImageUrls = require('../models/ProductImageUrls');
 
 const createProduct = async(req:Request , res: Response) => {
     const { description, title, price }: Product = req.body;
@@ -32,7 +33,7 @@ const createProduct = async(req:Request , res: Response) => {
                 files[key].mv(filepath, (err: never) => {
                     if(err) return res.status(500).json({data : "server error!"});
                 });
-                const fileUrl =`images/${title}_${files[key].name}`;
+                const fileUrl =(`images/${title}_${files[key].name}`).replace(/\s/g, '');
                 const resultforImage = await ProductImageUrl.create({
                     id: imageId,
                     productId: id,
@@ -93,7 +94,14 @@ const getProducts = async(req:Request , res: Response) => {
             where: conditions,
             order: [[sortOn, direction]],
             offset: itemPerPage && currentPage ? (Number(currentPage) - 1) * Number(itemPerPage) : undefined,
-            limit: itemPerPage ? Number(itemPerPage) : undefined
+            limit: itemPerPage ? Number(itemPerPage) : undefined,
+            include: [
+                {
+                    model: ProductImageUrls,
+                    as: 'images', 
+                    attributes: ['imageUrl'],
+                },
+            ],
         })
         if(!rows.length)
             return res.status(404).json({message: "no item found"});

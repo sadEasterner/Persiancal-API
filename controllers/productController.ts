@@ -117,7 +117,16 @@ const getProductById = async(req:Request , res: Response) => {
     const { id } = req.params;
     if(!id) return res.status(400).json({message: "id is Empty"});
     try {
-        const foundProcuts = await Products.findOne({ where: { id: id } });
+        const foundProcuts = await Products.findOne({ 
+            where: { id: id },
+            include: [
+                {
+                    model: ProductImageUrls,
+                    as: 'images', 
+                    attributes: ['imageUrl'],
+                },
+            ],
+        });
         if(!foundProcuts) return res.status(404).json({message: "no item found"});
         const ProductInfo : ProductInfo = {
             description: foundProcuts.description,

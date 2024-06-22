@@ -10,19 +10,23 @@ import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedReque
 import { LOG_TYPE, logger } from "../middleware/logEvents";
 
 const createCourse = async (req: Request, res: Response) => {
-  const { title, description, provider }: Course = req.body;
+  const { title, description, provider, duration }: Course =
+    req.body;
   if (!title)
     return res.status(400).json({ message: "course title is required" });
   if (!description)
     return res.status(400).json({ message: "description is required" });
   if (!provider)
     return res.status(400).json({ message: "provider is required" });
+  if (!duration)
+    return res.status(400).json({ message: "duration is required" });
   try {
     const result = await Courses.create({
       id: uuidv4(),
       title: title,
       description: description,
       provider: provider,
+      duration: duration,
       courseStatus: COURSE_STATUS.Active,
     });
     if (!result) return res.status(500).json({ message: "server error" });

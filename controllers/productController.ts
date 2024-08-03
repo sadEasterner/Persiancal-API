@@ -8,9 +8,8 @@ import path from "path";
 import { ProductInfo } from "../interfaces/product/IProductInfo";
 import { PRODUCT_STATUS } from "../config/parameters/products-status";
 import { ProductFilter } from "../interfaces/product/IProductFilter";
-const ProductImageUrl = require("../models/productImageUrls");
 const Products = require("../models/products");
-const ProductImageUrls = require("../models/ProductImageUrls");
+const ImageUrls = require("../models/imageUrls");
 
 const createProduct = async (req: Request, res: Response) => {
   const { description, title, price }: Product = req.body;
@@ -38,10 +37,10 @@ const createProduct = async (req: Request, res: Response) => {
         files[key].mv(filepath, (err: never) => {
           if (err) return res.status(500).json({ data: "server error!" });
         });
-        const resultforImage = await ProductImageUrl.create({
+        const resultforImage = await ImageUrls.create({
           id: imageId,
-          productId: id,
-          imageUrl: `images/${fileUrl}`,
+          itemId: id,
+          imageUrl: `images/${fileUrl + id}`,
         });
       });
     }
@@ -111,7 +110,7 @@ const getProducts = async (req: Request, res: Response) => {
       limit: itemPerPage ? Number(itemPerPage) : undefined,
       include: [
         {
-          model: ProductImageUrls,
+          model: ImageUrls,
           as: "images",
           attributes: ["imageUrl"],
         },
@@ -138,7 +137,7 @@ const getProductById = async (req: Request, res: Response) => {
       where: { id: id },
       include: [
         {
-          model: ProductImageUrls,
+          model: ImageUrls,
           as: "images",
           attributes: ["imageUrl"],
         },

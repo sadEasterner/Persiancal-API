@@ -15,7 +15,7 @@ import feedback from "./routes/feedback";
 import course from "./routes/course";
 import { verifyJWT } from "./middleware/verifyJWT";
 const Products = require("./models/products");
-const ProductImageUrls = require("./models/productImageUrls");
+const ImageUrls = require("./models/imageUrls");
 const Users = require("./models/users");
 const Labs = require("./models/labs");
 const Feedbacks = require("./models/feedbacks");

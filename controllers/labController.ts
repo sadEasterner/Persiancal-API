@@ -137,7 +137,7 @@ const getLabs = async (req: Request, res: Response) => {
       include: [
         {
           model: ImageUrls,
-          as: "images",
+          as: "labImages",
           attributes: ["imageUrl"],
         },
       ],

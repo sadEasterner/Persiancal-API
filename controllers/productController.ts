@@ -138,7 +138,7 @@ const getProductById = async (req: Request, res: Response) => {
       include: [
         {
           model: ImageUrls,
-          as: "images",
+          as: "productImages",
           attributes: ["imageUrl"],
         },
       ],

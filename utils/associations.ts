@@ -3,10 +3,10 @@ const ImageUrls = require("../models/imageUrls");
 const Labs = require("../models/products");
 
 // Labs
-Labs.hasMany(ImageUrls, { foreignKey: "itemId", as: "images" });
-ImageUrls.belongsTo(Labs, { foreignKey: "itemId", as: "product" });
+Labs.hasMany(ImageUrls, { foreignKey: "itemId", as: "labImages" });
+ImageUrls.belongsTo(Labs, { foreignKey: "itemId", as: "lab" });
 // products association
-Products.hasMany(ImageUrls, { foreignKey: "itemId", as: "images" });
+Products.hasMany(ImageUrls, { foreignKey: "itemId", as: "productImages" });
 ImageUrls.belongsTo(Products, {
   foreignKey: "itemId",
   as: "product",

@@ -1,6 +1,6 @@
-const Products = require("../models/products");
-const ImageUrls = require("../models/imageUrls");
-const Labs = require("../models/products");
+const Products = require("./products");
+const Labs = require("./labs");
+const ImageUrls = require("./imageUrls");
 
 // Labs
 Labs.hasMany(ImageUrls, { foreignKey: "itemId", as: "labImages" });

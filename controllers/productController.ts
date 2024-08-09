@@ -12,12 +12,10 @@ const Products = require("../models/products");
 const ImageUrls = require("../models/imageUrls");
 
 const createProduct = async (req: Request, res: Response) => {
-  const { description, title, price }: Product = req.body;
+  const { description, title }: Product = req.body;
   const files = (req as MulterRequest).files;
 
-  const message = !price
-    ? "Price is Empty"
-    : !description
+  const message = !description
     ? "Description is Empty"
     : !title
     ? "Title is Empty"
@@ -48,7 +46,6 @@ const createProduct = async (req: Request, res: Response) => {
       id: id,
       title: title,
       description: description,
-      price: Number(price),
     });
     if (result)
       return res
@@ -68,7 +65,6 @@ const getProducts = async (req: Request, res: Response) => {
   const {
     title,
     id,
-    price,
     productStatus,
     isAscending = true,
     sortOn = "title",
@@ -88,11 +84,6 @@ const getProducts = async (req: Request, res: Response) => {
     if (id) {
       conditions.id = {
         [Op.eq]: Number(id),
-      };
-    }
-    if (price) {
-      conditions.price = {
-        [Op.eq]: Number(price),
       };
     }
     if (productStatus) {
@@ -148,7 +139,6 @@ const getProductById = async (req: Request, res: Response) => {
     const ProductInfo: ProductInfo = {
       description: foundProcuts.description,
       id: foundProcuts.id,
-      price: foundProcuts.price,
       title: foundProcuts.title,
     };
     return res.status(200).json({ data: ProductInfo });
@@ -228,7 +218,6 @@ const editProduct = async (req: Request, res: Response) => {
     if (!foundProcuts)
       return res.status(404).json({ message: "no item found" });
     if (title) foundProcuts.title = title;
-    if (price) foundProcuts.price = price;
     if (description) foundProcuts.description = description;
 
     const result = await foundProcuts.save();

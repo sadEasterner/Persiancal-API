@@ -12,49 +12,67 @@ const Products = require("../models/products");
 const ImageUrls = require("../models/imageUrls");
 
 const createProduct = async (req: Request, res: Response) => {
-  const { description, title, price }: Product = req.body;
+  const { description, title }: Product = req.body;
   const files = (req as MulterRequest).files;
 
-  const message = !price
-    ? "Price is Empty"
-    : !description
+  // Check for required fields
+  const message = !description
     ? "Description is Empty"
     : !title
     ? "Title is Empty"
     : null;
   if (message) return res.status(400).json({ message: message });
 
+  // Check for duplicate product title
   const duplicateByName = await Products.findOne({ where: { title: title } });
   if (duplicateByName)
-    return res.status(409).json({ message: "This Title already exist" });
+    return res.status(409).json({ message: "This Title already exists" });
+
   try {
+    // First, create the Products record
     const id = uuidv4();
-    if (files) {
-      Object.keys(files).forEach(async (key) => {
-        const imageId = uuidv4();
-        const fileUrl = `${files[key].name}`.replace(/\s/g, "");
-        const filepath = path.join(__dirname, "..", "images", fileUrl);
-        files[key].mv(filepath, (err: never) => {
-          if (err) return res.status(500).json({ data: "server error!" });
-        });
-        const resultforImage = await ImageUrls.create({
-          id: imageId,
-          itemId: id,
-          imageUrl: `images/${fileUrl + id}`,
-        });
-      });
-    }
     const result = await Products.create({
       id: id,
       title: title,
       description: description,
-      price: Number(price),
     });
-    if (result)
-      return res
-        .status(201)
-        .json({ data: `New Product ${result.title} created!` });
+
+    if (!result) return res.status(500).json({ message: "Server error" });
+
+    // Then, handle the file uploads and insert into ProductImageUrls
+    if (files) {
+      for (const key of Object.keys(files)) {
+        const imageId = uuidv4();
+        // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
+        // const filepath = path.join(__dirname, "..", "images", fileUrl);
+        const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
+        const fileExtension = path.extname(originalFileName); // Get file extension
+        const uniqueFileName = `${path.basename(originalFileName, fileExtension)}-${imageId}${fileExtension}`;
+        const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+
+        // Move the file
+        await new Promise<void>((resolve, reject) => {
+          files[key].mv(filepath, (err: never) => {
+            if (err) {
+              reject(res.status(500).json({ data: "Server error!" }));
+            } else {
+              resolve();
+            }
+          });
+        });
+
+        // Insert the ProductImageUrls record
+        await ImageUrls.create({
+          id: imageId,
+          productId: id,
+          imageUrl: `images/${uniqueFileName}`,
+        });
+      }
+    }
+
+    return res.status(201).json({ data: `New Product ${result.title} created!` });
   } catch (error) {
+    // Log and handle the error
     logger(
       LOG_TYPE.Error,
       `${error}`,
@@ -62,13 +80,14 @@ const createProduct = async (req: Request, res: Response) => {
       "ProductController/createProduct"
     );
     console.log(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
 const getProducts = async (req: Request, res: Response) => {
   const {
     title,
     id,
-    price,
     productStatus,
     isAscending = true,
     sortOn = "title",
@@ -90,11 +109,6 @@ const getProducts = async (req: Request, res: Response) => {
         [Op.eq]: Number(id),
       };
     }
-    if (price) {
-      conditions.price = {
-        [Op.eq]: Number(price),
-      };
-    }
     if (productStatus) {
       conditions.productStatus = {
         [Op.eq]: Number(productStatus),
@@ -111,12 +125,12 @@ const getProducts = async (req: Request, res: Response) => {
       include: [
         {
           model: ImageUrls,
-          as: "images",
+          as: "productImages",
           attributes: ["imageUrl"],
         },
       ],
     });
-    if (!rows.length) return res.status(404).json({ message: "no item found" });
+    // if (!rows.length) return res.status(404).json({ message: "no item found" });
 
     return res.status(200).json({ data: rows, count: count });
   } catch (error) {
@@ -148,7 +162,6 @@ const getProductById = async (req: Request, res: Response) => {
     const ProductInfo: ProductInfo = {
       description: foundProcuts.description,
       id: foundProcuts.id,
-      price: foundProcuts.price,
       title: foundProcuts.title,
     };
     return res.status(200).json({ data: ProductInfo });
@@ -228,7 +241,6 @@ const editProduct = async (req: Request, res: Response) => {
     if (!foundProcuts)
       return res.status(404).json({ message: "no item found" });
     if (title) foundProcuts.title = title;
-    if (price) foundProcuts.price = price;
     if (description) foundProcuts.description = description;
 
     const result = await foundProcuts.save();

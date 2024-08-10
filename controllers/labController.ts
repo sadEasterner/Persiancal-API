@@ -24,38 +24,58 @@ const createLab = async (req: Request, res: Response) => {
   const duplicate = await Labs.findOne({ where: { name: name } });
   if (duplicate)
     return res.status(409).json({ message: "Lab by this name already exists" });
+
   try {
+    // First, create the Labs record
     const id = uuidv4();
-    if (files) {
-      Object.keys(files).forEach(async (key) => {
-        const imageId = uuidv4();
-        const fileUrl = `${files[key].name}`.replace(/\s/g, "");
-        const filepath = path.join(__dirname, "..", "images", fileUrl);
-        files[key].mv(filepath, (err: never) => {
-          if (err) return res.status(500).json({ data: "server error!" });
-        });
-        const resultforImage = await ImageUrls.create({
-          id: imageId,
-          itemId: id,
-          imageUrl: `images/${fileUrl + id}`,
-        });
-      });
-    }
     const result = await Labs.create({
-      id: uuidv4(),
+      id: id,
       name: name,
       description: description,
       labStatus: LAB_STATUS.Active,
     });
+
     if (!result) return res.status(500).json({ message: "server error" });
-    return res
-      .status(201)
-      .json({ data: `lab by this id: ${result.id} created` });
+
+    // Then, handle the file uploads and insert into LabImageUrls
+    if (files) {
+      for (const key of Object.keys(files)) {
+        const imageId = uuidv4();
+        // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
+        // const filepath = path.join(__dirname, "..", "images", fileUrl);
+        const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
+        const fileExtension = path.extname(originalFileName); // Get file extension
+        const uniqueFileName = `${path.basename(originalFileName, fileExtension)}-${imageId}${fileExtension}`;
+        const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+
+        // Move the file
+        await new Promise<void>((resolve, reject) => {
+          files[key].mv(filepath, (err: never) => {
+            if (err) {
+              reject(res.status(500).json({ data: "server error!" }));
+            } else {
+              resolve();
+            }
+          });
+        });
+
+        // Insert the LabImageUrls record
+        await ImageUrls.create({
+          id: imageId,
+          labId: id,
+          imageUrl: `images/${uniqueFileName}`,
+        });
+      }
+    }
+
+    return res.status(201).json({ data: `lab by this id: ${result.id} created` });
   } catch (error) {
     console.log(error);
     logger(LOG_TYPE.Error, `${error}`, "error", "labController/createLab");
+    return res.status(500).json({ message: "server error" });
   }
 };
+
 const editLab = async (req: Request, res: Response) => {
   const { id, name, description, labStatus }: Lab = req.body;
 
@@ -91,6 +111,13 @@ const getLabById = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const foundLab = await Labs.findOne({
       where: { id: id },
+      include: [
+        {
+          model: ImageUrls,
+          as: "labImages",
+          attributes: ["imageUrl"],
+        },
+      ],
       // attributes: { exclude: ['password', 'refreshToken', 'role'] },
     });
     if (!foundLab)

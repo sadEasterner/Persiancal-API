@@ -14,13 +14,13 @@ import user from "./routes/user";
 import feedback from "./routes/feedback";
 import course from "./routes/course";
 import { verifyJWT } from "./middleware/verifyJWT";
-const Products = require("./models/products");
-const ImageUrls = require("./models/imageUrls");
-const Users = require("./models/users");
-const Labs = require("./models/labs");
-const Feedbacks = require("./models/feedbacks");
-const Courses = require("./models/courses");
-const Associations = require("./utils/associations");
+require("./models/products");
+require("./models/imageUrls");
+require("./models/users");
+require("./models/labs");
+require("./models/feedbacks");
+require("./models/courses");
+require("./models/associations");
 
 require("dotenv").config();
 

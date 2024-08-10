@@ -11,9 +11,13 @@ const ImageUrls = sequelize.define("imageUrls", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  itemId: {
+  labId: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,  // Make sure to allow null so that it can be either a lab or product image
+  },
+  productId: {
+    type: DataTypes.STRING,
+    allowNull: true,  // Make sure to allow null so that it can be either a lab or product image
   },
 });
 

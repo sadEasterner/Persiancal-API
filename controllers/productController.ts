@@ -9,12 +9,13 @@ import { ProductInfo } from "../interfaces/product/IProductInfo";
 import { PRODUCT_STATUS } from "../config/parameters/products-status";
 import { ProductFilter } from "../interfaces/product/IProductFilter";
 const Products = require("../models/products");
-const ImageUrls = require("../models/imageUrls");
+const ProductImageUrls = require("../models/ProductImageUrls");
 
 const createProduct = async (req: Request, res: Response) => {
   const { description, title }: Product = req.body;
   const files = (req as MulterRequest).files;
 
+  // Check for required fields
   const message = !description
     ? "Description is Empty"
     : !title
@@ -22,36 +23,59 @@ const createProduct = async (req: Request, res: Response) => {
     : null;
   if (message) return res.status(400).json({ message: message });
 
+  // Check for duplicate product title
   const duplicateByName = await Products.findOne({ where: { title: title } });
   if (duplicateByName)
-    return res.status(409).json({ message: "This Title already exist" });
+    return res.status(409).json({ message: "This Title already exists" });
+
   try {
+    // First, create the Products record
     const id = uuidv4();
-    if (files) {
-      Object.keys(files).forEach(async (key) => {
-        const imageId = uuidv4();
-        const fileUrl = `${files[key].name}`.replace(/\s/g, "");
-        const filepath = path.join(__dirname, "..", "images", fileUrl);
-        files[key].mv(filepath, (err: never) => {
-          if (err) return res.status(500).json({ data: "server error!" });
-        });
-        const resultforImage = await ImageUrls.create({
-          id: imageId,
-          itemId: id,
-          imageUrl: `images/${fileUrl + id}`,
-        });
-      });
-    }
     const result = await Products.create({
       id: id,
       title: title,
       description: description,
     });
-    if (result)
-      return res
-        .status(201)
-        .json({ data: `New Product ${result.title} created!` });
+
+    if (!result) return res.status(500).json({ message: "Server error" });
+
+    // Then, handle the file uploads and insert into ProductImageUrls
+    if (files) {
+      for (const key of Object.keys(files)) {
+        const imageId = uuidv4();
+        // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
+        // const filepath = path.join(__dirname, "..", "images", fileUrl);
+
+        const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
+        const fileExtension = path.extname(originalFileName); // Get file extension
+        const uniqueFileName = `${path.basename(originalFileName, fileExtension)}-${imageId}${fileExtension}`;
+        const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+
+        // Move the file
+        await new Promise<void>((resolve, reject) => {
+          files[key].mv(filepath, (err: never) => {
+            if (err) {
+              reject(res.status(500).json({ data: "Server error!" }));
+            } else {
+              resolve();
+            }
+          });
+        });
+
+        // Insert the ProductImageUrls record
+        await ProductImageUrls.create({
+          id: imageId,
+          productId: id,
+          imageUrl: `images/${uniqueFileName}`,
+        });
+      }
+    }
+
+    return res
+      .status(201)
+      .json({ data: `New Product ${result.title} created!` });
   } catch (error) {
+    // Log and handle the error
     logger(
       LOG_TYPE.Error,
       `${error}`,
@@ -59,8 +83,10 @@ const createProduct = async (req: Request, res: Response) => {
       "ProductController/createProduct"
     );
     console.log(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
+
 const getProducts = async (req: Request, res: Response) => {
   const {
     title,
@@ -101,7 +127,7 @@ const getProducts = async (req: Request, res: Response) => {
       limit: itemPerPage ? Number(itemPerPage) : undefined,
       include: [
         {
-          model: ImageUrls,
+          model: ProductImageUrls,
           as: "productImages",
           attributes: ["imageUrl"],
         },
@@ -128,7 +154,7 @@ const getProductById = async (req: Request, res: Response) => {
       where: { id: id },
       include: [
         {
-          model: ImageUrls,
+          model: ProductImageUrls,
           as: "productImages",
           attributes: ["imageUrl"],
         },

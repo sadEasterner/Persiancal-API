@@ -111,6 +111,13 @@ const getLabById = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const foundLab = await Labs.findOne({
       where: { id: id },
+      include: [
+        {
+          model: ImageUrls,
+          as: "labImages",
+          attributes: ["imageUrl"],
+        },
+      ],
       // attributes: { exclude: ['password', 'refreshToken', 'role'] },
     });
     if (!foundLab)

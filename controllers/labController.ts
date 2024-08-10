@@ -42,7 +42,7 @@ const createLab = async (req: Request, res: Response) => {
       });
     }
     const result = await Labs.create({
-      id: uuidv4(),
+      id: id,
       name: name,
       description: description,
       labStatus: LAB_STATUS.Active,

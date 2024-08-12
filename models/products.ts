@@ -13,6 +13,10 @@ const Products = sequelize.define("product", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  provider: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   productStatus: {
     type: DataTypes.INTEGER,
     defaultValue: PRODUCT_STATUS.Pendding,

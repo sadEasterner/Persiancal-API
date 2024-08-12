@@ -12,7 +12,7 @@ const Products = require("../models/products");
 const ImageUrls = require("../models/imageUrls");
 
 const createProduct = async (req: Request, res: Response) => {
-  const { description, title }: Product = req.body;
+  const { description, title, provider }: Product = req.body;
   const files = (req as MulterRequest).files;
 
   // Check for required fields
@@ -20,6 +20,8 @@ const createProduct = async (req: Request, res: Response) => {
     ? "Description is Empty"
     : !title
     ? "Title is Empty"
+    : !provider
+    ? "Provider is Empty"
     : null;
   if (message) return res.status(400).json({ message: message });
 
@@ -34,6 +36,7 @@ const createProduct = async (req: Request, res: Response) => {
     const result = await Products.create({
       id: id,
       title: title,
+      provider: provider,
       description: description,
     });
 
@@ -47,7 +50,10 @@ const createProduct = async (req: Request, res: Response) => {
         // const filepath = path.join(__dirname, "..", "images", fileUrl);
         const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
         const fileExtension = path.extname(originalFileName); // Get file extension
-        const uniqueFileName = `${path.basename(originalFileName, fileExtension)}-${imageId}${fileExtension}`;
+        const uniqueFileName = `${path.basename(
+          originalFileName,
+          fileExtension
+        )}-${imageId}${fileExtension}`;
         const filepath = path.join(__dirname, "..", "images", uniqueFileName);
 
         // Move the file
@@ -70,7 +76,9 @@ const createProduct = async (req: Request, res: Response) => {
       }
     }
 
-    return res.status(201).json({ data: `New Product ${result.title} created!` });
+    return res
+      .status(201)
+      .json({ data: `New Product ${result.title} created!` });
   } catch (error) {
     // Log and handle the error
     logger(
@@ -90,6 +98,7 @@ const getProducts = async (req: Request, res: Response) => {
     id,
     productStatus,
     isAscending = true,
+    provider,
     sortOn = "title",
     itemPerPage = 0,
     currentPage = 0,
@@ -102,6 +111,11 @@ const getProducts = async (req: Request, res: Response) => {
     if (title) {
       conditions.title = {
         [Op.like]: `%${title}%`,
+      };
+    }
+    if (provider) {
+      conditions.provider = {
+        [Op.like]: `%${provider}%`,
       };
     }
     if (id) {

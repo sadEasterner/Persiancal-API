@@ -13,7 +13,7 @@ const Labs = sequelize.define('lab',{
         allowNull: false,
     },
     description: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     labStatus: {

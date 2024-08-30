@@ -10,7 +10,7 @@ const Products = sequelize.define("product", {
   },
   title: DataTypes.STRING,
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   provider: {

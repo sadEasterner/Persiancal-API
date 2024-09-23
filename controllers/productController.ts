@@ -272,7 +272,22 @@ const editProduct = async (req: Request, res: Response) => {
     );
   }
 };
+const deleteProductImage = async (req: Request, res: Response) => {
+  const { imageUrl }: {imageUrl: string} = req.body;
+  if(!imageUrl) return res.status(404).json({message: "image url is empty "});
+  const pathanme = imageUrl.split('/').pop(); 
+  try {
+    await ImageUrls.destroy({  
+      where: {
+        imageUrl,
+      }
+    })
+    // renmved the file here 
+  } catch (error) {
+    
+  }
 
+}
 export default {
   createProduct,
   getProducts,

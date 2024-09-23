@@ -19,7 +19,7 @@ const Products = sequelize.define("product", {
   },
   productStatus: {
     type: DataTypes.INTEGER,
-    defaultValue: PRODUCT_STATUS.Pendding,
+    defaultValue: PRODUCT_STATUS.Enable,
   },
 });
 

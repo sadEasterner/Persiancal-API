@@ -13,6 +13,8 @@ import auth from "./routes/auth";
 import user from "./routes/user";
 import feedback from "./routes/feedback";
 import course from "./routes/course";
+import article from "./routes/article";
+import certificate from "./routes/certificate";
 import { verifyJWT } from "./middleware/verifyJWT";
 require("./models/products");
 require("./models/imageUrls");
@@ -20,7 +22,10 @@ require("./models/users");
 require("./models/labs");
 require("./models/feedbacks");
 require("./models/courses");
+require("./models/articles");
 require("./models/associations");
+require("./models/userFilesUrls");
+require("./models/certificates");
 
 require("dotenv").config();
 
@@ -33,12 +38,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 app.use("/images", express.static(path.join(__dirname, "images")));
+app.use("/attachments", express.static(path.join(__dirname, "attachments")));
+app.use("/user-files", express.static(path.join(__dirname, "user-files")));
+app.use("/certificates", express.static(path.join(__dirname, "certificates")));
 
 app.use("/auth", auth);
 app.use("/product", product);
 app.use("/lab", lab);
 app.use("/feedback", feedback);
 app.use("/course", course);
+app.use("/article", article);
+app.use("/certificate", certificate);
 app.use(verifyJWT);
 app.use("/user", user);
 

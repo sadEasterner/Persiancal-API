@@ -1,10 +1,9 @@
-export interface Course {
+export interface Consultation {
   id?: string;
   title?: string;
   description?: string;
   provider?: string;
-  courseStatus?: number;
-  duration?: number;
+  consultationStatus?: number;
   imagePath?: string;
   attachmentPath?: string;
 }

@@ -3,6 +3,5 @@ export interface Certificate {
   title?: string;
   description?: string;
   provider?: string;
-  certificationStatus?: number;
   filePath?: any;
 }

@@ -1,6 +1,5 @@
 import { Filter } from "../filtering/IFilter";
 
-export interface CertFilter extends Filter {
-  title: string;
+export interface ActivityFilter extends Filter {
   provider: string;
 }

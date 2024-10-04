@@ -8,6 +8,7 @@ import path from "path";
 import { ProductInfo } from "../interfaces/product/IProductInfo";
 import { PRODUCT_STATUS } from "../config/parameters/products-status";
 import { ProductFilter } from "../interfaces/product/IProductFilter";
+import fs from "fs";
 const Products = require("../models/products");
 const ImageUrls = require("../models/imageUrls");
 
@@ -266,6 +267,40 @@ const editProduct = async (req: Request, res: Response) => {
     );
   }
 };
+const AddProductImage = async (req: Request, res: Response) => {
+  const { id } = req.body;
+  const files = (req as MulterRequest).files;
+  if (files) {
+    for (const key of Object.keys(files)) {
+      const imageId = uuidv4();
+      // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
+      // const filepath = path.join(__dirname, "..", "images", fileUrl);
+      const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
+      const fileExtension = path.extname(originalFileName); // Get file extension
+      const uniqueFileName = `${path.basename(
+        originalFileName,
+        fileExtension
+      )}-${imageId}${fileExtension}`;
+      const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+
+      await new Promise<void>((resolve, reject) => {
+        files[key].mv(filepath, (err: never) => {
+          if (err) {
+            reject(res.status(500).json({ data: "Server error!" }));
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      await ImageUrls.create({
+        id: imageId,
+        productId: id,
+        imageUrl: `images/${uniqueFileName}`,
+      });
+    }
+  }
+};
 const deleteProductImage = async (req: Request, res: Response) => {
   const { imageUrl }: { imageUrl: string } = req.body;
   if (!imageUrl)
@@ -277,8 +312,22 @@ const deleteProductImage = async (req: Request, res: Response) => {
         imageUrl,
       },
     });
-    // renmved the file here
-  } catch (error) {}
+
+    fs.unlink(pathanme!, (err) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Error removing the file from the server",
+          error: err.message,
+        });
+      }
+      res.status(200).json({ message: "Image deleted successfully" });
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: `${error}` });
+  }
 };
 export default {
   createProduct,

@@ -4,20 +4,51 @@ import { Request, Response } from "express";
 import { Op } from "sequelize";
 import { v4 as uuidv4 } from "uuid";
 import { ARTICLE_STATUS } from "../config/parameters/article-status";
+import path from "path";
 // import { Course } from "../interfaces/course/ICourse";
 import { Article } from "../interfaces/article/IArticle";
 import { ArticleFilter } from "../interfaces/article/IArticleFilter";
 import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedRequest";
 import { LOG_TYPE, logger } from "../middleware/logEvents";
+import { MulterRequest } from "../interfaces/requests/IMulterRequest";
 
 const createArticle = async (req: Request, res: Response) => {
   const { title, text, provider }: Article = req.body;
-  console.log(req.files);
   if (!title)
     return res.status(400).json({ message: "article title is required" });
   if (!text) return res.status(400).json({ message: "text is required" });
   if (!provider)
     return res.status(400).json({ message: "provider is required" });
+  let attachmentPath = "";
+  const file = (req as MulterRequest).files?.attachment;
+
+  if (file) {
+    const id = uuidv4();
+    const originalFileName = file.name.replace(/\s/g, "");
+    const fileExtension = path.extname(originalFileName);
+    const uniqueFileName = `${path.basename(
+      originalFileName,
+      fileExtension
+    )}-${id}${fileExtension}`;
+    const filepath = path.join(__dirname, "..", "attachments", uniqueFileName);
+
+    attachmentPath = `attachments/${uniqueFileName}`;
+
+    await new Promise<void>((resolve, reject) => {
+      file.mv(filepath, (err: never) => {
+        if (err) {
+          reject(
+            res
+              .status(500)
+              .json({ message: "Server error while saving the image!" })
+          );
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
   try {
     const result = await Articles.create({
       id: uuidv4(),
@@ -25,7 +56,7 @@ const createArticle = async (req: Request, res: Response) => {
       text: text,
       provider: provider,
       articleStatus: ARTICLE_STATUS.Active,
-      attachmentUrl: "test",
+      attachmentUrl: attachmentPath,
     });
     if (!result) return res.status(500).json({ message: "server error" });
     return res

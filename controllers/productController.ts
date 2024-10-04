@@ -31,7 +31,6 @@ const createProduct = async (req: Request, res: Response) => {
     return res.status(409).json({ message: "This Title already exists" });
 
   try {
-    // First, create the Products record
     const id = uuidv4();
     const result = await Products.create({
       id: id,
@@ -42,21 +41,17 @@ const createProduct = async (req: Request, res: Response) => {
 
     if (!result) return res.status(500).json({ message: "Server error" });
 
-    // Then, handle the file uploads and insert into ProductImageUrls
     if (files) {
       for (const key of Object.keys(files)) {
         const imageId = uuidv4();
-        // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
-        // const filepath = path.join(__dirname, "..", "images", fileUrl);
-        const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
-        const fileExtension = path.extname(originalFileName); // Get file extension
+        const originalFileName = files[key].name.replace(/\s/g, "");
+        const fileExtension = path.extname(originalFileName);
         const uniqueFileName = `${path.basename(
           originalFileName,
           fileExtension
         )}-${imageId}${fileExtension}`;
         const filepath = path.join(__dirname, "..", "images", uniqueFileName);
 
-        // Move the file
         await new Promise<void>((resolve, reject) => {
           files[key].mv(filepath, (err: never) => {
             if (err) {
@@ -67,7 +62,6 @@ const createProduct = async (req: Request, res: Response) => {
           });
         });
 
-        // Insert the ProductImageUrls record
         await ImageUrls.create({
           id: imageId,
           productId: id,
@@ -273,21 +267,19 @@ const editProduct = async (req: Request, res: Response) => {
   }
 };
 const deleteProductImage = async (req: Request, res: Response) => {
-  const { imageUrl }: {imageUrl: string} = req.body;
-  if(!imageUrl) return res.status(404).json({message: "image url is empty "});
-  const pathanme = imageUrl.split('/').pop(); 
+  const { imageUrl }: { imageUrl: string } = req.body;
+  if (!imageUrl)
+    return res.status(404).json({ message: "image url is empty " });
+  const pathanme = imageUrl.split("/").pop();
   try {
-    await ImageUrls.destroy({  
+    await ImageUrls.destroy({
       where: {
         imageUrl,
-      }
-    })
-    // renmved the file here 
-  } catch (error) {
-    
-  }
-
-}
+      },
+    });
+    // renmved the file here
+  } catch (error) {}
+};
 export default {
   createProduct,
   getProducts,

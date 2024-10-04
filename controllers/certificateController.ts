@@ -4,15 +4,17 @@ import { Request, Response } from "express";
 import { Op } from "sequelize";
 import { v4 as uuidv4 } from "uuid";
 import { CERTIFICATE_STATUS } from "../config/parameters/certificate-status";
+import path from "path";
 // import { Course } from "../interfaces/course/ICourse";
 import { Certificate } from "../interfaces/certificate/ICert";
 import { CertFilter } from "../interfaces/certificate/ICertFilter";
 import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedRequest";
 import { LOG_TYPE, logger } from "../middleware/logEvents";
+import { MulterRequest } from "../interfaces/requests/IMulterRequest";
 
 const createCertificate = async (req: Request, res: Response) => {
   const { title, description, provider }: Certificate = req.body;
-  console.log(req.files);
+  const files = (req as MulterRequest).files;
 
   if (!title)
     return res.status(400).json({ message: "certificate title is required" });
@@ -20,14 +22,46 @@ const createCertificate = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "description is required" });
   if (!provider)
     return res.status(400).json({ message: "provider is required" });
+
+  let filePath = "";
+
+  if (files) {
+    for (const key of Object.keys(files)) {
+      const fileId = uuidv4();
+      const originalFileName = files[key].name.replace(/\s/g, "");
+      const fileExtension = path.extname(originalFileName);
+      const uniqueFileName = `${path.basename(
+        originalFileName,
+        fileExtension
+      )}-${fileId}${fileExtension}`;
+      const filepath = path.join(
+        __dirname,
+        "..",
+        "certifications",
+        uniqueFileName
+      );
+
+      await new Promise<void>((resolve, reject) => {
+        files[key].mv(filepath, (err: never) => {
+          if (err) {
+            reject(res.status(500).json({ data: "Server error!" }));
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      filePath = `certifications/${uniqueFileName}`;
+    }
+  }
+
   try {
     const result = await Certificates.create({
       id: uuidv4(),
       title: title,
       description: description,
       provider: provider,
-      certificationStatus: CERTIFICATE_STATUS.Active,
-      filePath: "test",
+      filePath: filePath,
     });
     if (!result) return res.status(500).json({ message: "server error" });
     return res
@@ -98,7 +132,6 @@ const createCertificate = async (req: Request, res: Response) => {
 const getCertificates = async (req: Request, res: Response) => {
   const {
     title,
-    certificateStatus,
     provider,
     isAscending = true,
     sortOn = "title",
@@ -119,11 +152,7 @@ const getCertificates = async (req: Request, res: Response) => {
         [Op.like]: `%${provider}%`,
       };
     }
-    if (certificateStatus) {
-      conditions.certificationStatus = {
-        [Op.eq]: Number(certificateStatus),
-      };
-    }
+
     const { count, rows } = await Certificates.findAndCountAll({
       where: conditions,
       // attributes: { exclude: ['password', 'refreshToken'] },
@@ -150,18 +179,15 @@ const deleteCertificate = async (req: Request, res: Response) => {
   if (!id) return res.status(400).json({ message: "id is Empty" });
 
   try {
-    const foundCertificate = await Certificates.findOne({ where: { id: id } });
+    const foundCertificate = await Certificates.findByPk(id);
 
     if (!foundCertificate)
-      return res.status(401).json({ message: "id does not exist" });
-    foundCertificate.certificateStatus = CERTIFICATE_STATUS.Deleted;
-
-    const result = await foundCertificate.save();
-    if (!result) return res.status(500).json({ message: "server error" });
+      return res.status(404).json({ message: "id does not exist" });
+    await foundCertificate.destroy();
 
     return res
       .status(201)
-      .json({ data: `certificate by this id: ${result.id} deleted` });
+      .json({ data: `certificate by this id: ${id} deleted` });
   } catch (error) {
     console.log(error);
     logger(

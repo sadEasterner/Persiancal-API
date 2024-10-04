@@ -156,17 +156,28 @@ const changeUserStatus = async (req: Request, res: Response) => {
 };
 const getUserByUsername = async (req: AuthenticatedRequest, res: Response) => {
   const { username } = req.params;
-
-  if (!username)
-    return res.status(400).json({ message: "Username is required" });
+  // return res.status(400).json({ message: "Username is required" });
   if (
     !(req.currentRole === ROLES_LIST.Admin || req.currentUsername === username)
   )
     return res.status(403).json({ message: "Forbidden requset" });
+
+  let searchingUser = username || req.currentUsername;
+  console.log("1111111111111111111", username);
+  console.log("22222222222222222", req.currentUsername);
+  console.log("3333333333333333333", searchingUser);
+
   try {
     const foundUser = await Users.findOne({
-      where: { username: username },
+      where: { username: searchingUser },
       attributes: { exclude: ["password", "refreshToken", "role"] },
+      include: [
+        {
+          model: UserFilesUrls,
+          as: "userFiles",
+          attributes: ["userFileUrl"],
+        },
+      ],
     });
     if (!foundUser)
       return res.status(401).json({ message: "Username does not exist" });

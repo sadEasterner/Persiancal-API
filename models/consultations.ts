@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../utils/database";
-import { COURSE_STATUS } from "../config/parameters/course-status";
+import { CONSULTATION_STATUS } from "../config/parameters/consultation-status";
 
-const Courses = sequelize.define("course", {
+const Consultations = sequelize.define("consultation", {
   id: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -20,13 +20,9 @@ const Courses = sequelize.define("course", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  courseStatus: {
+  consultationStatus: {
     type: DataTypes.INTEGER,
-    defaultValue: COURSE_STATUS.Active,
-    allowNull: false,
-  },
-  duration: {
-    type: DataTypes.INTEGER,
+    defaultValue: CONSULTATION_STATUS.Active,
     allowNull: false,
   },
   imagePath: {
@@ -39,4 +35,4 @@ const Courses = sequelize.define("course", {
   },
 });
 
-module.exports = Courses;
+module.exports = Consultations;

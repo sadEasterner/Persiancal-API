@@ -1,17 +1,13 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../utils/database";
 
-const Certificates = sequelize.define("certificate", {
+const Activities = sequelize.define("activity", {
   id: {
     type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
   },
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  description: {
+  text: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
@@ -19,9 +15,9 @@ const Certificates = sequelize.define("certificate", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  filePath: {
+  imagePath: {
     type: DataTypes.STRING,
   },
 });
 
-module.exports = Certificates;
+module.exports = Activities;

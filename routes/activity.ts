@@ -1,12 +1,11 @@
 import Router from "express";
 import { verifyRoles, ROLES_LIST } from "../middleware/verifyRoles";
-import courseController from "../controllers/courseController";
+import activityController from "../controllers/activityController";
 import { verifyJWT } from "../middleware/verifyJWT";
 import fileUpload from "express-fileupload";
 const router = Router();
 
-router.route("/getList").get(courseController.getCourses);
-router.route("/getById/:id").get(courseController.getCourseById);
+router.route("/getList").get(activityController.getActivities);
 
 router
   .route("")
@@ -14,19 +13,15 @@ router
     verifyJWT,
     verifyRoles(ROLES_LIST.Admin),
     fileUpload({ createParentPath: true }),
-    courseController.createCourse
+    activityController.createActivity
   );
-
-router
-  .route("")
-  .put(verifyJWT, verifyRoles(ROLES_LIST.Admin), courseController.editCourse);
 
 router
   .route("/:id")
   .delete(
     verifyJWT,
     verifyRoles(ROLES_LIST.Admin),
-    courseController.deleteCourse
+    activityController.deleteActivity
   );
 
 export default router;

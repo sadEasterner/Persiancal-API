@@ -332,7 +332,7 @@ const deleteProductImage = async (req: Request, res: Response) => {
     console.error(error);
     return res
       .status(500)
-      .json({ message: "Internal server error", error: error.message });
+      .json({ message: "Internal server error", error: `${error}` });
   }
 };
 export default {

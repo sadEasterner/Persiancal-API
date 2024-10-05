@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { Op } from "sequelize";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
 import { COURSE_STATUS } from "../config/parameters/course-status";
 import { Course } from "../interfaces/course/ICourse";
 import { CourseFilter } from "../interfaces/course/ICourseFilter";
@@ -23,8 +24,8 @@ const createCourse = async (req: Request, res: Response) => {
   if (files.image || files.attachment) {
     for (const key of Object.keys(files)) {
       const id = uuidv4();
-      const originalFileName = files[key].name.replace(/\s/g, ""); 
-      const fileExtension = path.extname(originalFileName); 
+      const originalFileName = files[key].name.replace(/\s/g, "");
+      const fileExtension = path.extname(originalFileName);
       const uniqueFileName = `${path.basename(
         originalFileName,
         fileExtension
@@ -62,8 +63,10 @@ const createCourse = async (req: Request, res: Response) => {
       provider: provider,
       duration: duration,
       courseStatus: COURSE_STATUS.Active,
-      imagePath: `images/${filePaths.imagePath}`,
-      attachmentPath: `attachments/${filePaths.attachmentPath}`,
+      imagePath: filePaths.imagePath ? `images/${filePaths.imagePath}` : null,
+      attachmentPath: filePaths.attachmentPath
+        ? `attachments/${filePaths.attachmentPath}`
+        : null,
     });
     if (!result) return res.status(500).json({ message: "server error" });
     return res
@@ -185,6 +188,36 @@ const deleteCourse = async (req: Request, res: Response) => {
 
     if (!foundCourse)
       return res.status(401).json({ message: "id does not exist" });
+
+    // Get the paths for the image and attachment
+    const imagePath = foundCourse.imagePath;
+    const attachmentPath = foundCourse.attachmentPath;
+
+    // If there is an associated image, delete it from the file system
+    if (imagePath) {
+      const fullImagePath = path.join(__dirname, "..", imagePath);
+      fs.unlink(fullImagePath, (err) => {
+        if (err) {
+          console.error(`Failed to delete image file: ${imagePath}`, err);
+        }
+      });
+    }
+
+    // If there is an associated attachment, delete it from the file system
+    if (attachmentPath) {
+      const fullAttachmentPath = path.join(__dirname, "..", attachmentPath);
+      fs.unlink(fullAttachmentPath, (err) => {
+        if (err) {
+          console.error(
+            `Failed to delete attachment file: ${attachmentPath}`,
+            err
+          );
+        }
+      });
+    }
+
+    foundCourse.imagePath = null;
+    foundCourse.attachmentPath = null;
     foundCourse.courseStatus = COURSE_STATUS.Deleted;
 
     const result = await foundCourse.save();

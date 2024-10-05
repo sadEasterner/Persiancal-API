@@ -5,6 +5,7 @@ import { Op } from "sequelize";
 import { v4 as uuidv4 } from "uuid";
 import { ARTICLE_STATUS } from "../config/parameters/article-status";
 import path from "path";
+import fs from "fs";
 // import { Course } from "../interfaces/course/ICourse";
 import { Article } from "../interfaces/article/IArticle";
 import { ArticleFilter } from "../interfaces/article/IArticleFilter";
@@ -183,6 +184,21 @@ const deleteArticle = async (req: Request, res: Response) => {
 
     if (!foundArticle)
       return res.status(401).json({ message: "id does not exist" });
+
+    // If attachmentPath exists, delete the file from the filesystem
+    if (foundArticle.attachmentPath) {
+      const filePath = path.join(__dirname, "..", foundArticle.attachmentPath);
+
+      // Using fs.unlink to delete the file
+      await fs.promises.unlink(filePath).catch((err) => {
+        console.error(`Failed to delete file: ${filePath}`, err);
+        return res
+          .status(500)
+          .json({ message: "Failed to delete the attachment file" });
+      });
+    }
+
+    // Mark the article as deleted
     foundArticle.articleStatus = ARTICLE_STATUS.Deleted;
 
     const result = await foundArticle.save();
@@ -199,9 +215,9 @@ const deleteArticle = async (req: Request, res: Response) => {
       "error",
       "articleController/deleteArticle"
     );
+    return res.status(500).json({ message: "server error" });
   }
 };
-
 export default {
   createArticle,
   //   getCourseById,

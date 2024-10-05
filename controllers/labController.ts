@@ -2,6 +2,7 @@
 const Labs = require("../models/labs");
 const ImageUrls = require("../models/imageUrls");
 import { Op, where } from "sequelize";
+import fs from "fs";
 import { NextFunction, Request, Response } from "express";
 import { MulterRequest } from "../interfaces/requests/IMulterRequest";
 import { LOG_TYPE, logger } from "../middleware/logEvents";
@@ -45,7 +46,10 @@ const createLab = async (req: Request, res: Response) => {
         // const filepath = path.join(__dirname, "..", "images", fileUrl);
         const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
         const fileExtension = path.extname(originalFileName); // Get file extension
-        const uniqueFileName = `${path.basename(originalFileName, fileExtension)}-${imageId}${fileExtension}`;
+        const uniqueFileName = `${path.basename(
+          originalFileName,
+          fileExtension
+        )}-${imageId}${fileExtension}`;
         const filepath = path.join(__dirname, "..", "images", uniqueFileName);
 
         // Move the file
@@ -68,7 +72,9 @@ const createLab = async (req: Request, res: Response) => {
       }
     }
 
-    return res.status(201).json({ data: `lab by this id: ${result.id} created` });
+    return res
+      .status(201)
+      .json({ data: `lab by this id: ${result.id} created` });
   } catch (error) {
     console.log(error);
     logger(LOG_TYPE.Error, `${error}`, "error", "labController/createLab");
@@ -188,6 +194,24 @@ const deleteLab = async (req: Request, res: Response) => {
 
     const result = await foundLab.save();
     if (!result) return res.status(500).json({ message: "server error" });
+
+    const labImages = await ImageUrls.findAll({ where: { labId: id } });
+
+    if (labImages.length > 0) {
+      await ImageUrls.destroy({ where: { labId: id } });
+
+      labImages.forEach((image: any) => {
+        const imagePath = path.join(__dirname, "..", image.imageUrl); // Full path to the image
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            console.error(
+              `Failed to delete image file: ${image.imageUrl}`,
+              err
+            );
+          }
+        });
+      });
+    }
 
     return res
       .status(201)

@@ -2,6 +2,7 @@
 const Activities = require("../models/activities");
 import { Request, Response } from "express";
 import { Op } from "sequelize";
+import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import { Activity } from "../interfaces/activity/IActivity";
@@ -119,12 +120,28 @@ const deleteActivity = async (req: Request, res: Response) => {
     const activity = await Activities.findByPk(id);
 
     if (!activity) {
-      return res.status(404).json({ error: "activity not found" });
+      return res.status(404).json({ error: "Activity not found" });
     }
 
+    // If there is an associated image, delete it from the file system
+    const imagePath = activity.imagePath;
+    if (imagePath) {
+      const fullImagePath = path.join(__dirname, "..", imagePath);
+
+      // Unlink (delete) the image file from the /images directory
+      fs.unlink(fullImagePath, (err) => {
+        if (err) {
+          console.error(`Failed to delete image file: ${imagePath}`, err);
+        }
+      });
+    }
+
+    // Delete the activity record from the database
     await activity.destroy();
 
-    return res.status(201).json({ data: `activity by this id: ${id} deleted` });
+    return res
+      .status(201)
+      .json({ data: `Activity with ID: ${id} and its image (if any) deleted` });
   } catch (error) {
     console.log(error);
     logger(
@@ -133,6 +150,7 @@ const deleteActivity = async (req: Request, res: Response) => {
       "error",
       "activityController/deleteActivity"
     );
+    return res.status(500).json({ message: "Server error" });
   }
 };
 

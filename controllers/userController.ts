@@ -13,6 +13,7 @@ import { UserInfo } from "../interfaces/user/IUserInfo";
 import { USER_STATUS } from "../config/parameters/user-status";
 import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedRequest";
 import { UserFilter } from "../interfaces/user/IUserFilter";
+import fs from "fs";
 const UserFilesUrls = require("../models/userFilesUrls");
 
 const createUser = async (req: Request, res: Response) => {
@@ -271,6 +272,23 @@ const deleteUser = async (req: Request, res: Response) => {
     const result = await foundUser.save();
     if (!result) return res.status(500).json({ message: "server error" });
 
+    const userFiles = await UserFilesUrls.findAll({
+      where: { userUsername: username },
+    });
+
+    if (userFiles.length > 0) {
+      await UserFilesUrls.destroy({ where: { userUsername: username } });
+
+      userFiles.forEach((file: any) => {
+        const filePath = path.join(__dirname, "..", file.userFileUrl); // Full path to the image
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error(`Failed to delete file: ${file.userFileUrl}`, err);
+          }
+        });
+      });
+    }
+
     return res
       .status(201)
       .json({ data: `user name by this username: ${result.username} deleted` });
@@ -284,6 +302,83 @@ const deleteUser = async (req: Request, res: Response) => {
     );
   }
 };
+const AddUserFile = async (req: Request, res: Response) => {
+  const { username } = req.body;
+  const files = (req as MulterRequest).files;
+
+  try {
+    if (files) {
+      for (const key of Object.keys(files)) {
+        const fileId = uuidv4();
+        // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
+        // const filepath = path.join(__dirname, "..", "images", fileUrl);
+        const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
+        const fileExtension = path.extname(originalFileName); // Get file extension
+        const uniqueFileName = `${path.basename(
+          originalFileName,
+          fileExtension
+        )}-${fileId}${fileExtension}`;
+        const filepath = path.join(
+          __dirname,
+          "..",
+          "user-files",
+          uniqueFileName
+        );
+
+        await new Promise<void>((resolve, reject) => {
+          files[key].mv(filepath, (err: never) => {
+            if (err) {
+              reject(res.status(500).json({ data: "Server error!" }));
+            } else {
+              resolve();
+            }
+          });
+        });
+
+        await UserFilesUrls.create({
+          id: fileId,
+          userUsername: username,
+          userFileUrl: `user-files/${uniqueFileName}`,
+        });
+      }
+    }
+    return res.status(201).json({ data: `file uploaded!` });
+  } catch (error) {
+    logger(LOG_TYPE.Error, `${error}`, "errors", "userController/addUserFile");
+    console.log(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+const deleteUserFile = async (req: Request, res: Response) => {
+  const { userFileUrl } = req.body;
+
+  if (!userFileUrl)
+    return res.status(404).json({ message: "file url is empty " });
+  // const pathanme = imageUrl.split("/").pop();
+
+  try {
+    await UserFilesUrls.destroy({
+      where: {
+        userFileUrl,
+      },
+    });
+
+    fs.unlink(userFileUrl!, (err) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Error removing the file from the server",
+          error: err.message,
+        });
+      }
+      res.status(200).json({ message: "file deleted successfully" });
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: `${error}` });
+  }
+};
 
 export default {
   createUser,
@@ -292,4 +387,6 @@ export default {
   editUser,
   changeUserStatus,
   deleteUser,
+  AddUserFile,
+  deleteUserFile,
 };

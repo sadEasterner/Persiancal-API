@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { Op } from "sequelize";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
 import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedRequest";
 import { LOG_TYPE, logger } from "../middleware/logEvents";
 import { MulterRequest } from "../interfaces/requests/IMulterRequest";
@@ -59,8 +60,10 @@ const createConsultation = async (req: Request, res: Response) => {
       description: description,
       provider: provider,
       consultationStatus: CONSULTATION_STATUS.Active,
-      imagePath: `images/${filePaths.imagePath}`,
-      attachmentPath: `attachments/${filePaths.attachmentPath}`,
+      imagePath: filePaths.imagePath ? `images/${filePaths.imagePath}` : null,
+      attachmentPath: filePaths.attachmentPath
+        ? `attachments/${filePaths.attachmentPath}`
+        : null,
     });
     if (!result) return res.status(500).json({ message: "server error" });
     return res
@@ -195,16 +198,48 @@ const deleteConsultation = async (req: Request, res: Response) => {
       where: { id: id },
     });
 
-    if (!foundConsultation)
+    if (!foundConsultation) {
       return res.status(401).json({ message: "id does not exist" });
-    foundConsultation.consultationStatus = CONSULTATION_STATUS.Deleted;
+    }
 
+    // Get the paths for the image and attachment
+    const imagePath = foundConsultation.imagePath;
+    const attachmentPath = foundConsultation.attachmentPath;
+
+    // If there is an associated image, delete it from the file system
+    if (imagePath) {
+      const fullImagePath = path.join(__dirname, "..", imagePath);
+      fs.unlink(fullImagePath, (err) => {
+        if (err) {
+          console.error(`Failed to delete image file: ${imagePath}`, err);
+        }
+      });
+    }
+
+    // If there is an associated attachment, delete it from the file system
+    if (attachmentPath) {
+      const fullAttachmentPath = path.join(__dirname, "..", attachmentPath);
+      fs.unlink(fullAttachmentPath, (err) => {
+        if (err) {
+          console.error(
+            `Failed to delete attachment file: ${attachmentPath}`,
+            err
+          );
+        }
+      });
+    }
+
+    // Change the consultation status to Deleted
+    foundConsultation.consultationStatus = CONSULTATION_STATUS.Deleted;
+    foundConsultation.imagePath = null;
+    foundConsultation.attachmentPath = null;
     const result = await foundConsultation.save();
+
     if (!result) return res.status(500).json({ message: "server error" });
 
-    return res
-      .status(201)
-      .json({ data: `consultation by this id: ${result.id} deleted` });
+    return res.status(201).json({
+      data: `Consultation with ID: ${result.id} and its files (if any) deleted`,
+    });
   } catch (error) {
     console.log(error);
     logger(
@@ -213,6 +248,7 @@ const deleteConsultation = async (req: Request, res: Response) => {
       "error",
       "consultationController/deleteConsultation"
     );
+    return res.status(500).json({ message: "Server error" });
   }
 };
 

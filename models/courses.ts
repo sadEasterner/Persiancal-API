@@ -13,7 +13,7 @@ const Courses = sequelize.define("course", {
     allowNull: false,
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   provider: {

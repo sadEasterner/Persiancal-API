@@ -27,4 +27,16 @@ router
   .route("/:username")
   .delete(verifyRoles(ROLES_LIST.Admin), userController.deleteUser);
 
+router
+  .route("/addFile")
+  .post(
+    verifyRoles(ROLES_LIST.Admin),
+    fileUpload({ createParentPath: true }),
+    userController.AddUserFile
+  );
+
+router
+  .route("/deleteFile")
+  .post(verifyRoles(ROLES_LIST.Admin), userController.deleteUserFile);
+
 export default router;

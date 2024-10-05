@@ -229,9 +229,28 @@ const deleteProduct = async (req: Request, res: Response) => {
 
     const result = await foundProcuts.save();
     if (!result) return res.status(500).json({ message: "server error" });
+
+    const productImages = await ImageUrls.findAll({ where: { productId: id } });
+
+    if (productImages.length > 0) {
+      await ImageUrls.destroy({ where: { productId: id } });
+
+      productImages.forEach((image: any) => {
+        const imagePath = path.join(__dirname, "..", image.imageUrl); // Full path to the image
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            console.error(
+              `Failed to delete image file: ${image.imageUrl}`,
+              err
+            );
+          }
+        });
+      });
+    }
+
     return res
       .status(200)
-      .json({ data: `user by this id : ${result.id} deleted` });
+      .json({ data: `product by this id : ${result.id} deleted` });
   } catch (error) {
     console.log(error);
     logger(
@@ -270,42 +289,57 @@ const editProduct = async (req: Request, res: Response) => {
 const AddProductImage = async (req: Request, res: Response) => {
   const { id } = req.body;
   const files = (req as MulterRequest).files;
-  if (files) {
-    for (const key of Object.keys(files)) {
-      const imageId = uuidv4();
-      // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
-      // const filepath = path.join(__dirname, "..", "images", fileUrl);
-      const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
-      const fileExtension = path.extname(originalFileName); // Get file extension
-      const uniqueFileName = `${path.basename(
-        originalFileName,
-        fileExtension
-      )}-${imageId}${fileExtension}`;
-      const filepath = path.join(__dirname, "..", "images", uniqueFileName);
 
-      await new Promise<void>((resolve, reject) => {
-        files[key].mv(filepath, (err: never) => {
-          if (err) {
-            reject(res.status(500).json({ data: "Server error!" }));
-          } else {
-            resolve();
-          }
+  try {
+    if (files) {
+      for (const key of Object.keys(files)) {
+        const imageId = uuidv4();
+        // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
+        // const filepath = path.join(__dirname, "..", "images", fileUrl);
+        const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
+        const fileExtension = path.extname(originalFileName); // Get file extension
+        const uniqueFileName = `${path.basename(
+          originalFileName,
+          fileExtension
+        )}-${imageId}${fileExtension}`;
+        const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+
+        await new Promise<void>((resolve, reject) => {
+          files[key].mv(filepath, (err: never) => {
+            if (err) {
+              reject(res.status(500).json({ data: "Server error!" }));
+            } else {
+              resolve();
+            }
+          });
         });
-      });
 
-      await ImageUrls.create({
-        id: imageId,
-        productId: id,
-        imageUrl: `images/${uniqueFileName}`,
-      });
+        await ImageUrls.create({
+          id: imageId,
+          productId: id,
+          imageUrl: `images/${uniqueFileName}`,
+        });
+      }
     }
+    return res.status(201).json({ data: `image uploaded!` });
+  } catch (error) {
+    logger(
+      LOG_TYPE.Error,
+      `${error}`,
+      "errors",
+      "ProductController/addProductImage"
+    );
+    console.log(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 const deleteProductImage = async (req: Request, res: Response) => {
-  const { imageUrl }: { imageUrl: string } = req.body;
+  const { imageUrl } = req.body;
+
   if (!imageUrl)
     return res.status(404).json({ message: "image url is empty " });
-  const pathanme = imageUrl.split("/").pop();
+  // const pathanme = imageUrl.split("/").pop();
+
   try {
     await ImageUrls.destroy({
       where: {
@@ -313,7 +347,7 @@ const deleteProductImage = async (req: Request, res: Response) => {
       },
     });
 
-    fs.unlink(pathanme!, (err) => {
+    fs.unlink(imageUrl!, (err) => {
       if (err) {
         return res.status(500).json({
           message: "Error removing the file from the server",
@@ -336,4 +370,6 @@ export default {
   editProduct,
   changeProductStatus,
   deleteProduct,
+  AddProductImage,
+  deleteProductImage,
 };

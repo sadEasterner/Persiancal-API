@@ -36,4 +36,21 @@ router
     productController.deleteProduct
   );
 
+router
+  .route("/addImage")
+  .post(
+    verifyJWT,
+    verifyRoles(ROLES_LIST.Admin),
+    fileUpload({ createParentPath: true }),
+    productController.AddProductImage
+  );
+
+router
+  .route("/deleteImage")
+  .post(
+    verifyJWT,
+    verifyRoles(ROLES_LIST.Admin),
+    productController.deleteProductImage
+  );
+
 export default router;

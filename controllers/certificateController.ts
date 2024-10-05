@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { Op } from "sequelize";
 import { v4 as uuidv4 } from "uuid";
 import { CERTIFICATE_STATUS } from "../config/parameters/certificate-status";
+import fs from "fs";
 import path from "path";
 // import { Course } from "../interfaces/course/ICourse";
 import { Certificate } from "../interfaces/certificate/ICert";
@@ -183,6 +184,18 @@ const deleteCertificate = async (req: Request, res: Response) => {
 
     if (!foundCertificate)
       return res.status(404).json({ message: "id does not exist" });
+
+    const filePath = foundCertificate.filePath;
+    if (filePath) {
+      const fullFilePath = path.join(__dirname, "..", filePath);
+
+      fs.unlink(fullFilePath, (err) => {
+        if (err) {
+          console.error(`Failed to delete file: ${filePath}`, err);
+        }
+      });
+    }
+
     await foundCertificate.destroy();
 
     return res

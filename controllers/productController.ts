@@ -262,7 +262,7 @@ const deleteProduct = async (req: Request, res: Response) => {
   }
 };
 const editProduct = async (req: Request, res: Response) => {
-  const { description, title, price, id }: Product = req.body;
+  const { description, title, price, id, provider }: Product = req.body;
   if (!id) return res.status(400).json({ message: "id is Empty" });
   try {
     const foundProcuts = await Products.findOne({ where: { id: id } });
@@ -270,6 +270,7 @@ const editProduct = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "no item found" });
     if (title) foundProcuts.title = title;
     if (description) foundProcuts.description = description;
+    if (provider) foundProcuts.provider = provider;
 
     const result = await foundProcuts.save();
     if (!result) return res.status(500).json({ message: "server error" });

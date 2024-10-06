@@ -30,4 +30,22 @@ router
   .route("/:id")
   .delete(verifyJWT, verifyRoles(ROLES_LIST.Admin), labController.deleteLab);
 
+  router
+  .route("/addImage")
+  .post(
+    verifyJWT,
+    verifyRoles(ROLES_LIST.Admin),
+    fileUpload({ createParentPath: true }),
+    labController.AddLabImage
+  );
+
+router
+  .route("/deleteImage")
+  .post(
+    verifyJWT,
+    verifyRoles(ROLES_LIST.Admin),
+    labController.deleteLabImage
+  );
+
+
 export default router;

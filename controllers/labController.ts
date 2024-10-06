@@ -222,4 +222,82 @@ const deleteLab = async (req: Request, res: Response) => {
   }
 };
 
-export default { createLab, getLabById, getLabs, editLab, deleteLab };
+const AddLabImage = async (req: Request, res: Response) => {
+  const { id } = req.body;
+  const files = (req as MulterRequest).files;
+
+  try {
+    if (files) {
+      for (const key of Object.keys(files)) {
+        const imageId = uuidv4();
+        // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
+        // const filepath = path.join(__dirname, "..", "images", fileUrl);
+        const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
+        const fileExtension = path.extname(originalFileName); // Get file extension
+        const uniqueFileName = `${path.basename(
+          originalFileName,
+          fileExtension
+        )}-${imageId}${fileExtension}`;
+        const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+
+        await new Promise<void>((resolve, reject) => {
+          files[key].mv(filepath, (err: never) => {
+            if (err) {
+              reject(res.status(500).json({ data: "Server error!" }));
+            } else {
+              resolve();
+            }
+          });
+        });
+
+        await ImageUrls.create({
+          id: imageId,
+          labId: id,
+          imageUrl: `images/${uniqueFileName}`,
+        });
+      }
+    }
+    return res.status(201).json({ data: `image uploaded!` });
+  } catch (error) {
+    logger(
+      LOG_TYPE.Error,
+      `${error}`,
+      "errors",
+      "labController/addLabImage"
+    );
+    console.log(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+const deleteLabImage = async (req: Request, res: Response) => {
+  const { imageUrl } = req.body;
+
+  if (!imageUrl)
+    return res.status(404).json({ message: "image url is empty " });
+  // const pathanme = imageUrl.split("/").pop();
+
+  try {
+    await ImageUrls.destroy({
+      where: {
+        imageUrl,
+      },
+    });
+
+    fs.unlink(imageUrl!, (err) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Error removing the file from the server",
+          error: err.message,
+        });
+      }
+      res.status(200).json({ message: "Image deleted successfully" });
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: `${error}` });
+  }
+};
+
+export default { createLab, getLabById, getLabs, editLab, deleteLab,AddLabImage,deleteLabImage };

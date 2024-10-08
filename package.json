@@ -31,7 +31,8 @@
   "scripts": {
     "start": "nodemon --exec node_modules/.bin/ts-node --files index.ts",
     "start-production": "node index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "seed:up": "npx sequelize-cli db:seed:all"
   },
   "keywords": [],
   "author": "",

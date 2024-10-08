@@ -1,6 +1,6 @@
 export interface Activity {
   id?: string;
   text?: string;
-  provider?: string;
+  providerTitle?: string;
   imagePath?: string;
 }

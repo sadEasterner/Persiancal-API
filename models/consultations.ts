@@ -13,7 +13,7 @@ const Consultations = sequelize.define("consultation", {
     allowNull: false,
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   provider: {

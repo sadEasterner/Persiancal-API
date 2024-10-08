@@ -1,6 +1,8 @@
 const Products = require("./products");
 const Labs = require("./labs");
 const Users = require("./users");
+const Providers = require("./providers");
+const Activities = require("./activities");
 const ImageUrls = require("./imageUrls");
 const UserFilesUrls = require("./userFilesUrls");
 
@@ -16,4 +18,18 @@ ImageUrls.belongsTo(Products, { foreignKey: "productId", as: "product" });
 Users.hasMany(UserFilesUrls, { foreignKey: "userUsername", as: "userFiles" });
 UserFilesUrls.belongsTo(Users, { foreignKey: "userUsername", as: "user" });
 
-export { ImageUrls, Labs, Products, Users, UserFilesUrls };
+Providers.hasMany(Activities, {
+  foreignKey: "providerTitle",
+  as: "providerActivities",
+});
+Activities.belongsTo(Providers, { foreignKey: "providerTitle", as: "provider" });
+
+export {
+  ImageUrls,
+  Labs,
+  Products,
+  Users,
+  UserFilesUrls,
+  Activities,
+  Providers,
+};

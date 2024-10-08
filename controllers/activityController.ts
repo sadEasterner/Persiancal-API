@@ -12,11 +12,11 @@ import { LOG_TYPE, logger } from "../middleware/logEvents";
 import { MulterRequest } from "../interfaces/requests/IMulterRequest";
 
 const createActivity = async (req: Request, res: Response) => {
-  const { text, provider }: Activity = req.body;
+  const { text, providerTitle }: Activity = req.body;
 
   if (!text) return res.status(400).json({ message: "text is required" });
-  if (!provider)
-    return res.status(400).json({ message: "provider is required" });
+  if (!providerTitle)
+    return res.status(400).json({ message: "providerTitle is required" });
 
   let imagePath = "";
   const file = (req as MulterRequest).files?.image;
@@ -52,7 +52,7 @@ const createActivity = async (req: Request, res: Response) => {
     const result = await Activities.create({
       id: uuidv4(),
       text: text,
-      provider: provider,
+      providerTitle: providerTitle,
       imagePath: imagePath,
     });
 
@@ -74,7 +74,7 @@ const createActivity = async (req: Request, res: Response) => {
 
 const getActivities = async (req: Request, res: Response) => {
   const {
-    provider,
+    providerTitle,
     isAscending = true,
     sortOn = "text",
     itemPerPage = 0,
@@ -85,9 +85,9 @@ const getActivities = async (req: Request, res: Response) => {
   try {
     const conditions: any = {};
 
-    if (provider) {
-      conditions.provider = {
-        [Op.like]: `%${provider}%`,
+    if (providerTitle) {
+      conditions.providerTitle = {
+        [Op.like]: `%${providerTitle}%`,
       };
     }
 

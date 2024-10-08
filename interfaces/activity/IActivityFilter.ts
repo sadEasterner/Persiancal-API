@@ -1,5 +1,5 @@
 import { Filter } from "../filtering/IFilter";
 
 export interface ActivityFilter extends Filter {
-  provider: string;
+  providerTitle: string;
 }

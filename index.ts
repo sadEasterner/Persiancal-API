@@ -17,6 +17,7 @@ import article from "./routes/article";
 import certificate from "./routes/certificate";
 import consultation from "./routes/consultation";
 import activity from "./routes/activity";
+import provider from "./routes/providers";
 import { verifyJWT } from "./middleware/verifyJWT";
 require("./models/products");
 require("./models/imageUrls");
@@ -30,6 +31,7 @@ require("./models/userFilesUrls");
 require("./models/certificates");
 require("./models/consultations");
 require("./models/activities");
+require("./models/providers");
 
 require("dotenv").config();
 
@@ -55,6 +57,7 @@ app.use("/article", article);
 app.use("/certificate", certificate);
 app.use("/consultation", consultation);
 app.use("/activity", activity);
+app.use("/provider", provider);
 app.use(verifyJWT);
 app.use("/user", user);
 

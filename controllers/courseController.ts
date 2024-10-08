@@ -21,7 +21,7 @@ const createCourse = async (req: Request, res: Response) => {
   };
 
   const files = (req as MulterRequest).files;
-  if (files.image || files.attachment) {
+  if (files?.image || files?.attachment) {
     for (const key of Object.keys(files)) {
       const id = uuidv4();
       const originalFileName = files[key].name.replace(/\s/g, "");

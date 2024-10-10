@@ -6,6 +6,33 @@ import { LOG_TYPE, logger } from "../middleware/logEvents";
 const Providers = require("../models/providers");
 const Activities = require("../models/activities");
 
+const getProviderByTitle = async (req: Request, res: Response) => {
+  const { providerTitle } = req.params;
+
+  if (!providerTitle) return res.status(400).json({ message: "provider title is required" });
+
+  try {
+    const foundProvider = await Providers.findOne({
+      where: { providerTitle: providerTitle },
+      include: [
+        {
+          model: Activities,
+          as: "providerActivities",
+          attributes: ["id", "text", "imagePath"],
+        },
+      ],
+      // attributes: { exclude: ['password', 'refreshToken', 'role'] },
+    });
+    if (!foundProvider)
+      return res.status(401).json({ message: "title does not exist" });
+
+    return res.status(200).json({ data: foundProvider });
+  } catch (error) {
+    console.log(error);
+    logger(LOG_TYPE.Error, `${error}`, "error", "providerController/getProviderByTitle");
+  }
+};
+
 const getProviders = async (req: Request, res: Response) => {
   const {
     providerTitle,
@@ -90,5 +117,6 @@ const editProviderInfo = async (req: Request, res: Response) => {
 
 export default {
   getProviders,
+  getProviderByTitle,
   editProviderInfo,
 };

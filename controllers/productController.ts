@@ -123,7 +123,12 @@ const getProducts = async (req: Request, res: Response) => {
         [Op.eq]: Number(productStatus),
       };
     }
-    const { rows, count } = await Products.findAndCountAll({
+
+    const productsCount = await Products.count({
+      where: conditions,
+    });
+
+    const { rows } = await Products.findAndCountAll({
       where: conditions,
       order: [[sortOn, direction]],
       offset:
@@ -141,7 +146,7 @@ const getProducts = async (req: Request, res: Response) => {
     });
     // if (!rows.length) return res.status(404).json({ message: "no item found" });
 
-    return res.status(200).json({ data: rows, count: count });
+    return res.status(200).json({ data: rows, count: productsCount });
   } catch (error) {
     logger(
       LOG_TYPE.Error,

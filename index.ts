@@ -46,7 +46,10 @@ app.use(cookieParser());
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/attachments", express.static(path.join(__dirname, "attachments")));
 app.use("/user-files", express.static(path.join(__dirname, "user-files")));
-app.use("/certificates", express.static(path.join(__dirname, "certificates")));
+app.use(
+  "/certifications",
+  express.static(path.join(__dirname, "certifications"))
+);
 
 app.use("/auth", auth);
 app.use("/product", product);

@@ -84,12 +84,12 @@ const login = async (req: Request, res: Response) => {
         },
       },
       process.env.ACCESS_TOKEN_SECRET!,
-      { expiresIn: "3600s" }
+      { expiresIn: "1d" }
     );
     const refreshToken = jwt.sign(
       { username: username },
       process.env.REFRESH_TOKEN_SECRET!,
-      { expiresIn: "1d" }
+      { expiresIn: "3d" }
     );
     foundUser.refreshToken = refreshToken;
     const result = await foundUser.save();

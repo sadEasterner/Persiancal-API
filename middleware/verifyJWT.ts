@@ -42,7 +42,8 @@ export const verifyJWT = (
           "middleware",
           "middleware/verifyJWT/line-29"
         );
-        return res.sendStatus(403); //invalid token
+        return res.status(403).json({ message: "invalid token" }); //invalid token
+        // return res.sendStatus(403); //invalid token
       }
       req.currentUsername = (decoded as any).UserInfo.username;
       req.currentRole = (decoded as any).UserInfo.role;

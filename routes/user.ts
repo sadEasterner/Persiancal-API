@@ -14,7 +14,7 @@ router
   .route("")
   .post(
     verifyRoles(ROLES_LIST.Admin),
-    fileUpload({ createParentPath: true }),
+    fileUpload({ createParentPath: true, defParamCharset: "utf8" }),
     userController.createUser
   );
 

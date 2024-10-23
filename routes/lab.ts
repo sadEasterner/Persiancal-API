@@ -13,7 +13,7 @@ router
   .post(
     verifyJWT,
     verifyRoles(ROLES_LIST.Admin),
-    fileUpload({ createParentPath: true }),
+    fileUpload({ createParentPath: true, defParamCharset: "utf8" }),
     labController.createLab
   );
 
@@ -30,7 +30,7 @@ router
   .route("/:id")
   .delete(verifyJWT, verifyRoles(ROLES_LIST.Admin), labController.deleteLab);
 
-  router
+router
   .route("/addImage")
   .post(
     verifyJWT,
@@ -41,11 +41,6 @@ router
 
 router
   .route("/deleteImage")
-  .post(
-    verifyJWT,
-    verifyRoles(ROLES_LIST.Admin),
-    labController.deleteLabImage
-  );
-
+  .post(verifyJWT, verifyRoles(ROLES_LIST.Admin), labController.deleteLabImage);
 
 export default router;

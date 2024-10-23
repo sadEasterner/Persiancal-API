@@ -13,7 +13,7 @@ router
   .post(
     verifyJWT,
     verifyRoles(ROLES_LIST.Admin),
-    fileUpload({ createParentPath: true }),
+    fileUpload({ createParentPath: true, defParamCharset: "utf8" }),
     consultationController.createConsultation
   );
 

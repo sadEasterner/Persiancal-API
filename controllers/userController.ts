@@ -49,6 +49,8 @@ const createUser = async (req: Request, res: Response) => {
         // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
         // const filepath = path.join(__dirname, "..", "images", fileUrl);
         const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
+        console.log("6666666666666", originalFileName);
+
         const fileExtension = path.extname(originalFileName); // Get file extension
         const uniqueFileName = `${path.basename(
           originalFileName,

@@ -9,7 +9,8 @@ const Activities = require("../models/activities");
 const getProviderByTitle = async (req: Request, res: Response) => {
   const { providerTitle } = req.params;
 
-  if (!providerTitle) return res.status(400).json({ message: "provider title is required" });
+  if (!providerTitle)
+    return res.status(400).json({ message: "provider title is required" });
 
   try {
     const foundProvider = await Providers.findOne({
@@ -29,7 +30,12 @@ const getProviderByTitle = async (req: Request, res: Response) => {
     return res.status(200).json({ data: foundProvider });
   } catch (error) {
     console.log(error);
-    logger(LOG_TYPE.Error, `${error}`, "error", "providerController/getProviderByTitle");
+    logger(
+      LOG_TYPE.Error,
+      `${error}`,
+      "error",
+      "providerController/getProviderByTitle"
+    );
   }
 };
 

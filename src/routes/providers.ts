@@ -5,7 +5,9 @@ import { verifyJWT } from "../middleware/verifyJWT";
 const router = Router();
 
 router.route("/getList").get(providerController.getProviders);
-router.route("/getByTitle/:providerTitle").get(providerController.getProviderByTitle);
+router
+  .route("/getByTitle/:providerTitle")
+  .get(providerController.getProviderByTitle);
 
 // router
 //   .route("")
@@ -14,8 +16,6 @@ router.route("/getByTitle/:providerTitle").get(providerController.getProviderByT
 //     verifyRoles(ROLES_LIST.Admin),
 //     providerController.createProvider
 //   );
-
-
 
 router
   .route("")

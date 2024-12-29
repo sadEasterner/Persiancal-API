@@ -1,7 +1,7 @@
 import { ROLES_LIST } from "../config/parameters/roles-list";
 import { NextFunction, Request, Response } from "express";
 import { LOG_TYPE, logger } from "./logEvents";
-import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedRequest";
+import { AuthenticatedRequest } from "../src/interfaces/requests/IAuthenticatedRequest";
 
 const verifyRoles = (...alloedRoles: any) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

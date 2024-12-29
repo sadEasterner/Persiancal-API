@@ -259,12 +259,7 @@ const AddLabImage = async (req: Request, res: Response) => {
     }
     return res.status(201).json({ data: `image uploaded!` });
   } catch (error) {
-    logger(
-      LOG_TYPE.Error,
-      `${error}`,
-      "errors",
-      "labController/addLabImage"
-    );
+    logger(LOG_TYPE.Error, `${error}`, "errors", "labController/addLabImage");
     console.log(error);
     return res.status(500).json({ message: "Server error" });
   }
@@ -300,4 +295,12 @@ const deleteLabImage = async (req: Request, res: Response) => {
   }
 };
 
-export default { createLab, getLabById, getLabs, editLab, deleteLab,AddLabImage,deleteLabImage };
+export default {
+  createLab,
+  getLabById,
+  getLabs,
+  editLab,
+  deleteLab,
+  AddLabImage,
+  deleteLabImage,
+};

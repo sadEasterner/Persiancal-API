@@ -29,8 +29,8 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon --exec node_modules/.bin/ts-node --files src/index.ts",
-    "start-production": "node src/index.ts",
+    "start-dev": "nodemon --exec node_modules/.bin/ts-node --files src/index.ts",
+    "start": "node dist/index.js",
     "build": "tsc",
     "seed:up": "npx sequelize-cli db:seed:all"
   },

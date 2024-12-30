@@ -9,7 +9,7 @@ module.exports = {
         name: "Dr.Ali Tavakoli",
         email: "persia.azmasystem1@gmail.com",
         password:
-          "e4abae53cc1cebe5fe89ea93882c699a5e71ab0bbf42a83b7d833975b61c4a41",
+          "97089167ab147bcd545e77db278a230bf4ba4f404e4b27b5addf4b22646f2d98",
         role: 2,
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -49,7 +49,6 @@ const createUser = async (req: Request, res: Response) => {
         // const fileUrl = `${files[key].name}`.replace(/\s/g, "");
         // const filepath = path.join(__dirname, "..", "images", fileUrl);
         const originalFileName = files[key].name.replace(/\s/g, ""); // Remove spaces
-        console.log("6666666666666", originalFileName);
 
         const fileExtension = path.extname(originalFileName); // Get file extension
         const uniqueFileName = `${path.basename(
@@ -58,7 +57,7 @@ const createUser = async (req: Request, res: Response) => {
         )}-${fileId}${fileExtension}`;
         const filepath = path.join(
           __dirname,
-          "..",
+          "..",'..',
           "user-files",
           uniqueFileName
         );
@@ -282,7 +281,7 @@ const deleteUser = async (req: Request, res: Response) => {
       await UserFilesUrls.destroy({ where: { userUsername: username } });
 
       userFiles.forEach((file: any) => {
-        const filePath = path.join(__dirname, "..", file.userFileUrl); // Full path to the image
+        const filePath = path.join(__dirname, "..",'..', file.userFileUrl); // Full path to the image
         fs.unlink(filePath, (err) => {
           if (err) {
             console.error(`Failed to delete file: ${file.userFileUrl}`, err);
@@ -322,7 +321,7 @@ const AddUserFile = async (req: Request, res: Response) => {
         )}-${fileId}${fileExtension}`;
         const filepath = path.join(
           __dirname,
-          "..",
+          "..",'..',
           "user-files",
           uniqueFileName
         );

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import { logger, LOG_TYPE } from "./logEvents";
-import { AuthenticatedRequest } from "../src/interfaces/requests/IAuthenticatedRequest";
+import { AuthenticatedRequest } from "../interfaces/requests/IAuthenticatedRequest";
 
 export const verifyJWT = (
   req: AuthenticatedRequest,

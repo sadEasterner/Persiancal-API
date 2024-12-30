@@ -31,7 +31,13 @@ const createArticle = async (req: Request, res: Response) => {
       originalFileName,
       fileExtension
     )}-${id}${fileExtension}`;
-    const filepath = path.join(__dirname, "..", "attachments", uniqueFileName);
+    const filepath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "attachments",
+      uniqueFileName
+    );
 
     attachmentPath = `attachments/${uniqueFileName}`;
 
@@ -187,7 +193,12 @@ const deleteArticle = async (req: Request, res: Response) => {
 
     // If attachmentPath exists, delete the file from the filesystem
     if (foundArticle.attachmentPath) {
-      const filePath = path.join(__dirname, "..", foundArticle.attachmentPath);
+      const filePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        foundArticle.attachmentPath
+      );
 
       // Using fs.unlink to delete the file
       await fs.promises.unlink(filePath).catch((err) => {

@@ -37,7 +37,7 @@ const createCertificate = async (req: Request, res: Response) => {
       )}-${fileId}${fileExtension}`;
       const filepath = path.join(
         __dirname,
-        "..",
+        "..",'..',
         "certifications",
         uniqueFileName
       );
@@ -187,7 +187,7 @@ const deleteCertificate = async (req: Request, res: Response) => {
 
     const filePath = foundCertificate.filePath;
     if (filePath) {
-      const fullFilePath = path.join(__dirname, "..", filePath);
+      const fullFilePath = path.join(__dirname, "..",'..', filePath);
 
       fs.unlink(fullFilePath, (err) => {
         if (err) {

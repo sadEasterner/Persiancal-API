@@ -29,7 +29,7 @@ const createActivity = async (req: Request, res: Response) => {
       originalFileName,
       fileExtension
     )}-${id}${fileExtension}`;
-    const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+    const filepath = path.join(__dirname, "..",'..', "images", uniqueFileName);
 
     imagePath = `images/${uniqueFileName}`;
 
@@ -126,7 +126,7 @@ const deleteActivity = async (req: Request, res: Response) => {
     // If there is an associated image, delete it from the file system
     const imagePath = activity.imagePath;
     if (imagePath) {
-      const fullImagePath = path.join(__dirname, "..", imagePath);
+      const fullImagePath = path.join(__dirname, "..", '..', imagePath);
 
       // Unlink (delete) the image file from the /images directory
       fs.unlink(fullImagePath, (err) => {

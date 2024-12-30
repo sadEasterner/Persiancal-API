@@ -43,12 +43,12 @@ app.use(cors(corsOption));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/images", express.static(path.join(__dirname, "images")));
-app.use("/attachments", express.static(path.join(__dirname, "attachments")));
-app.use("/user-files", express.static(path.join(__dirname, "user-files")));
+app.use("/images", express.static(path.join(__dirname,'..', "images")));
+app.use("/attachments", express.static(path.join(__dirname,'..', "attachments")));
+app.use("/user-files", express.static(path.join(__dirname,'..', "user-files")));
 app.use(
   "/certifications",
-  express.static(path.join(__dirname, "certifications"))
+  express.static(path.join(__dirname,'..', "certifications"))
 );
 
 app.use("/auth", auth);

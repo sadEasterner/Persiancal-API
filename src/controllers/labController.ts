@@ -50,7 +50,7 @@ const createLab = async (req: Request, res: Response) => {
           originalFileName,
           fileExtension
         )}-${imageId}${fileExtension}`;
-        const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+        const filepath = path.join(__dirname, "..",'..', "images", uniqueFileName);
 
         // Move the file
         await new Promise<void>((resolve, reject) => {
@@ -201,7 +201,7 @@ const deleteLab = async (req: Request, res: Response) => {
       await ImageUrls.destroy({ where: { labId: id } });
 
       labImages.forEach((image: any) => {
-        const imagePath = path.join(__dirname, "..", image.imageUrl); // Full path to the image
+        const imagePath = path.join(__dirname, "..",'..', image.imageUrl); // Full path to the image
         fs.unlink(imagePath, (err) => {
           if (err) {
             console.error(

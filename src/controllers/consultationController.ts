@@ -31,7 +31,7 @@ const createConsultation = async (req: Request, res: Response) => {
         fileExtension
       )}-${id}${fileExtension}`;
 
-      const filepath = path.join(__dirname, "..", key + "s", uniqueFileName);
+      const filepath = path.join(__dirname, "..",'..', key + "s", uniqueFileName);
       const indexString: any = `${key}Path`;
       filePaths[indexString as any] = uniqueFileName;
 
@@ -208,7 +208,7 @@ const deleteConsultation = async (req: Request, res: Response) => {
 
     // If there is an associated image, delete it from the file system
     if (imagePath) {
-      const fullImagePath = path.join(__dirname, "..", imagePath);
+      const fullImagePath = path.join(__dirname, "..", '..',imagePath);
       fs.unlink(fullImagePath, (err) => {
         if (err) {
           console.error(`Failed to delete image file: ${imagePath}`, err);
@@ -218,7 +218,7 @@ const deleteConsultation = async (req: Request, res: Response) => {
 
     // If there is an associated attachment, delete it from the file system
     if (attachmentPath) {
-      const fullAttachmentPath = path.join(__dirname, "..", attachmentPath);
+      const fullAttachmentPath = path.join(__dirname, "..",'..', attachmentPath);
       fs.unlink(fullAttachmentPath, (err) => {
         if (err) {
           console.error(

@@ -51,7 +51,14 @@ const createProduct = async (req: Request, res: Response) => {
           originalFileName,
           fileExtension
         )}-${imageId}${fileExtension}`;
-        const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+        const filepath = path.join(
+          __dirname,
+          "..",
+          "..",
+          "images",
+          uniqueFileName
+        );
+
 
         await new Promise<void>((resolve, reject) => {
           files[key].mv(filepath, (err: never) => {
@@ -241,7 +248,7 @@ const deleteProduct = async (req: Request, res: Response) => {
       await ImageUrls.destroy({ where: { productId: id } });
 
       productImages.forEach((image: any) => {
-        const imagePath = path.join(__dirname, "..", image.imageUrl); // Full path to the image
+        const imagePath = path.join(__dirname, "..",'..', image.imageUrl); // Full path to the image
         fs.unlink(imagePath, (err) => {
           if (err) {
             console.error(
@@ -308,7 +315,7 @@ const AddProductImage = async (req: Request, res: Response) => {
           originalFileName,
           fileExtension
         )}-${imageId}${fileExtension}`;
-        const filepath = path.join(__dirname, "..", "images", uniqueFileName);
+        const filepath = path.join(__dirname, "..",'..', "images", uniqueFileName);
 
         await new Promise<void>((resolve, reject) => {
           files[key].mv(filepath, (err: never) => {
